@@ -9,8 +9,8 @@
 ### Integer Computational Insturctions
 1. **Integer R-I Instructions**   
     [0] ADDI  
-    [0] SLTI	(set less than imm)  
-    [0] SLTIU  
+    [1] SLTI	(set less than imm)  
+    [1] SLTIU  
     [1] XORI  
     [1] ORI  
     [1] ANDI  
@@ -23,8 +23,8 @@
 2. **Integer R-R Instructions**  
     [0] ADD  
     [0] SUB  
-    [0] SLT  
-    [0] SLTU  
+    [1] SLT  
+    [1] SLTU  
     [1] XOR  
     [0] SLL	(logical left shift)  
     [0] SRL      (logical right shift)  

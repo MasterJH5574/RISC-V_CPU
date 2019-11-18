@@ -69,6 +69,16 @@ module ID(
                     reg2Idx_out <= `regNOP;
 
                     case (funct3)
+                        3'b010: begin                                   // SLTI, I-type
+                            instIdx_out     <= `idSLT;
+                            instType_out    <= `typeSLT;
+                            imm             <= {{20{inst_in[31]}}, inst_in[31:20]};
+                        end
+                        3'b011: begin                                   // SLTIU, I_type
+                            instIdx_out     <= `idSLTU;
+                            instType_out    <= `typeSLT;
+                            imm             <= {{20{inst_in[31]}}, inst_in[31:20]};
+                        end
                         3'b100: begin                                   // XORI, I-type
                             instIdx_out     <= `idXOR;
                             instType_out    <= `typeLogic;
@@ -109,6 +119,14 @@ module ID(
                     imm         <= `ZERO32;
 
                     case (funct3)
+                        3'b010: begin                                   // SLT, R-type
+                            instIdx_out     <= `idSLT;
+                            instType_out    <= `typeSLT;
+                        end
+                        3'b011: begin                                   // SLTU, R-type
+                            instIdx_out     <= `idSLTU;
+                            instType_out    <= `typeSLT;
+                        end
                         3'b100: begin                                   // XOR, R-type
                             instIdx_out     <= `idXOR;
                             instType_out    <= `typeLogic;
