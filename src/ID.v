@@ -59,7 +59,7 @@ module ID(
             imm             <= `ZERO32;
         end else begin
             case (opcode)
-                `opRI : begin                                       // Reg-Imm
+                `opRI: begin                                        // Reg-Imm
                     instValid   <= `instValid;
                     rdE_out     <= `writeEnable;
                     reg1E_out   <= `readEnable;
@@ -69,8 +69,18 @@ module ID(
                     reg2Idx_out <= `regNOP;
 
                     case (funct3)
+                        3'b100: begin                                   // XORI, I-type
+                            instIdx_out     <= `idXOR;
+                            instType_out    <= `typeLogic;
+                            imm             <= {{20{inst_in[31]}}, inst_in[31:20]};
+                        end
                         3'b110: begin                                   // ORI, I-type
-                            instIdx_out     <= `idORI;
+                            instIdx_out     <= `idOR;
+                            instType_out    <= `typeLogic;
+                            imm             <= {{20{inst_in[31]}}, inst_in[31:20]};
+                        end
+                        3'b111: begin                                   // ANDI, I-type
+                            instIdx_out     <= `idAND;
                             instType_out    <= `typeLogic;
                             imm             <= {{20{inst_in[31]}}, inst_in[31:20]};
                         end
@@ -88,8 +98,43 @@ module ID(
                         end
                     endcase
                 end
+                `opRR: begin                                        // Reg-Reg
+                    instValid   <= `instValid;
+                    rdE_out     <= `writeEnable;
+                    reg1E_out   <= `readEnable;
+                    reg2E_out   <= `readEnable;
+                    rdIdx_out   <= inst_in[11:7];
+                    reg1Idx_out <= inst_in[19:15];
+                    reg2Idx_out <= inst_in[24:20];
+                    imm         <= `ZERO32;
+
+                    case (funct3)
+                        3'b100: begin                                   // XOR, R-type
+                            instIdx_out     <= `idXOR;
+                            instType_out    <= `typeLogic;
+                        end
+                        3'b110: begin                                   // OR, R-type
+                            instIdx_out     <= `idOR;
+                            instType_out    <= `typeLogic;
+                        end
+                        3'b111: begin                                   // AND, R-type
+                            instIdx_out     <= `idAND;
+                            instType_out    <= `typeLogic;
+                        end
+                    endcase
+                end
 
                 default : begin
+                    instValid       <= `instValid;
+                    instIdx_out     <= `idNOP;
+                    instType_out    <= `typeNOP;
+                    rdE_out         <= `writeDisable;
+                    rdIdx_out       <= `regNOP;
+                    reg1E_out       <= `readDisable;
+                    reg2E_out       <= `readDisable;
+                    reg1Idx_out     <= `regNOP;
+                    reg2Idx_out     <= `regNOP;
+                    imm             <= `ZERO32;
                 end
             endcase
         end

@@ -49,9 +49,6 @@
 `define idADDI          6'b010011
 `define idSLTI          6'b010100
 `define idSLTIU         6'b010101
-`define idXORI          6'b010110
-`define idORI           6'b010111
-`define idANDI          6'b011000
 `define idSLLI          6'b011001
 `define idSRLI          6'b011010
 `define idSRAI          6'b011011

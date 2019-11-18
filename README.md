@@ -11,9 +11,9 @@
     [0] ADDI  
     [0] SLTI	(set less than imm)  
     [0] SLTIU  
-    [0] XORI  
+    [1] XORI  
     [1] ORI  
-    [0] ANDI  
+    [1] ANDI  
     [0] SLLI	(logical left shift)  
     [0] SRLI	(logical right shift)  
     [0] SRAI	(arthmetic right shift)  
@@ -25,12 +25,12 @@
     [0] SUB  
     [0] SLT  
     [0] SLTU  
-    [0] XOR  
+    [1] XOR  
     [0] SLL	(logical left shift)  
     [0] SRL      (logical right shift)  
     [0] SRA	(arthmetic right shift)  
-    [0] OR  
-    [0] AND
+    [1] OR  
+    [1] AND
 
 3. **Nop Instructions**
 

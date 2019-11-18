@@ -27,8 +27,14 @@ module EX(
             resLogic <= `ZERO32;
         end else begin
             case (rdIdx_in)
-                `idORI: begin
+                `idXOR: begin                               // XORI, XOR
+                    resLogic <= rs1Data_in ^ rs2Data_in;
+                end
+                `idOR: begin                                // ORI, OR
                     resLogic <= rs1Data_in | rs2Data_in;
+                end
+                `idAND: begin                               // ANDI, AND
+                    resLogic <= rs1Data_in & rs2Data_in;
                 end
                 default : begin
                     resLogic <= `ZERO32;
