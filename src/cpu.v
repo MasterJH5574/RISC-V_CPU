@@ -67,12 +67,30 @@ module cpu(
     wire[`dataRange]        ID_rs1Data_out;
     wire[`dataRange]        ID_rs2Data_out;
 
+    // link EX to EX_MEM, also forwarding to ID
+    wire                    EX_rdE_out;
+    wire[`regIdxRange]      EX_rdIdx_out;
+    wire[`dataRange]        EX_rdData_out;
+
+    // link MEM to MEM_WB, also forwarding to ID
+    wire                    MEM_rdE_out;
+    wire[`regIdxRange]      MEM_rdIdx_out;
+    wire[`dataRange]        MEM_rdData_out;
+
     ID ID0(
         .rst_in(rst_in),
         .pc_in(IF_ID_pc_out),
         .inst_in(IF_ID_inst_out),
         .reg1Data_in(RegFile_reg1Data_out),
         .reg2Data_in(RegFile_reg2Data_out),
+        // -- begin forwarding input --
+        .EX_rdE_in(EX_rdE_out),
+        .EX_rdIdx_in(EX_rdIdx_out),
+        .EX_rdData_in(EX_rdData_out),
+        .MEM0_rdE_in(MEM_rdE_out),
+        .MEM0_rdIdx_in(MEM_rdIdx_out),
+        .MEM0_rdData_in(MEM_rdData_out),
+        // --- end forwarding input ---
         .reg1E_out(ID_reg1E_out),
         .reg2E_out(ID_reg2E_out),
         .reg1Idx_out(ID_reg1Idx_out),
@@ -110,11 +128,6 @@ module cpu(
         .rs2Data_out(ID_EX_rs2Data_out)
     );
 
-    // link EX to EX_MEM
-    wire                    EX_rdE_out;
-    wire[`regIdxRange]      EX_rdIdx_out;
-    wire[`dataRange]        EX_rdData_out;
-
     EX EX0(
         .rst_in(rst_in),
         .rdE_in(ID_EX_rdE_out),
@@ -143,11 +156,6 @@ module cpu(
         .rdIdx_out(EX_MEM_rdIdx_out),
         .rdData_out(EX_MEM_rdData_out)
     );
-
-    // link MEM to MEM_WB
-    wire                    MEM_rdE_out;
-    wire[`regIdxRange]      MEM_rdIdx_out;
-    wire[`dataRange]        MEM_rdData_out;
 
     MEM MEM0(
         .rst_in(rst_in),

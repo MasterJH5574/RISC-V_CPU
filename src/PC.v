@@ -20,9 +20,9 @@ module PC (
 
     always @ (posedge clk_in) begin
         if (ce == `chipDisable) begin
-            pc = `ZERO32;
+            pc_out = `ZERO32;
         end else begin
-            pc = pc + `PCSTEP;
+            pc_out = pc_out + `PCSTEP;
         end
     end
 

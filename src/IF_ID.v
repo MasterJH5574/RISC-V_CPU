@@ -14,7 +14,7 @@ module IF_ID(
 );
 
     always @ (posedge clk_in) begin
-        if (rst == `rstEnable) begin
+        if (rst_in == `rstEnable) begin
             pc_out <= `ZERO32;
             inst_out <= `ZERO32;
         end else begin

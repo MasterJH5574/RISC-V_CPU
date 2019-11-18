@@ -9,6 +9,15 @@ module ID(
     input wire[`dataRange]      reg1Data_in,
     input wire[`dataRange]      reg2Data_in,
 
+    // accept forwarding from the end of EX, MEM(not LD/ST)
+    input wire                  EX_rdE_in,
+    input wire[`regIdxRange]    EX_rdIdx_in,
+    input wire[`dataRange]      EX_rdData_in,
+
+    input wire                  MEM0_rdE_in,        // named "MEM0" in order to emphasize not LD/ST
+    input wire[`regIdxRange]    MEM0_rdIdx_in,
+    input wire[`dataRange]      MEM0_rdData_in,
+
     // output to RegFile
     output reg                  reg1E_out,
     output reg                  reg2E_out,
@@ -27,14 +36,15 @@ module ID(
 
 );
 
-    reg[6:0] opcode = inst_in[6:0];
-    reg[2:0] funct3 = inst_in[14:12];
-    reg[6:0] funct7 = inst_in[31:25];
+    wire[6:0] opcode = inst_in[6:0];
+    wire[2:0] funct3 = inst_in[14:12];
+    wire[6:0] funct7 = inst_in[31:25];
 
     reg[`dataRange] imm;
     reg instValid;              // Todo: usage of instValid?
 
     // ---------------- DECODE -------------------
+    // Todo: Remember to decode the IMMEDIATE
     always @ (*) begin
         if (rst_in == `rstEnable) begin
             instValid       <= `instValid;
@@ -59,10 +69,10 @@ module ID(
                     reg2Idx_out <= `regNOP;
 
                     case (funct3)
-                        1'b110: begin                                   // ORI
+                        3'b110: begin                                   // ORI, I-type
                             instIdx_out     <= `idORI;
                             instType_out    <= `typeLogic;
-                            imm             <= inst_in[31:20];
+                            imm             <= {{20{inst_in[31]}}, inst_in[31:20]};
                         end
                         default : begin
                             instIdx_out     <= `idNOP;
@@ -89,10 +99,16 @@ module ID(
     always @ (*) begin
         if (rst_in == `rstEnable) begin
             rs1Data_out <= `ZERO32;
+        end else if (reg1E_out == `readEnable && EX_rdE_in == `writeEnable &&
+            EX_rdIdx_in == reg1Idx_out) begin
+            rs1Data_out <= EX_rdData_in;
+        end else if (reg1E_out == `readEnable && MEM0_rdE_in == `writeEnable &&
+            MEM0_rdIdx_in == reg1Idx_out) begin
+            rs1Data_out <= MEM0_rdData_in;
         end else if (reg1E_out == `readEnable) begin
             rs1Data_out <= reg1Data_in;
         end else if (reg1E_out == `readDisable) begin
-            rs1Data_out <= imm;  // Todo: what? <= imm?
+            rs1Data_out <= imm;  // Todo: why "rs1Data_out <= imm"?
         end else begin
             rs1Data_out <= `ZERO32;
         end
@@ -101,10 +117,16 @@ module ID(
     always @ (*) begin
         if (rst_in == `rstEnable) begin
             rs2Data_out <= `ZERO32;
+        end else if (reg2E_out == `readEnable && EX_rdE_in == `writeEnable &&
+            EX_rdIdx_in == reg2Idx_out) begin
+            rs2Data_out <= EX_rdData_in;
+        end else if (reg2E_out == `readEnable && MEM0_rdE_in == `writeEnable &&
+            MEM0_rdIdx_in== reg2Idx_out) begin
+            rs2Data_out <= MEM0_rdData_in;
         end else if (reg2E_out == `readEnable) begin
             rs2Data_out <= reg2Data_in;
         end else if (reg2E_out == `readDisable) begin
-            rs2Data_out <= imm;  // Todo: what? <= imm?
+            rs2Data_out <= imm;  // Todo: why "rs2Data_oujt <= imm"?
         end else begin
             rs2Data_out <= `ZERO32;
         end

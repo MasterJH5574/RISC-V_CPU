@@ -5,9 +5,9 @@ module EX_MEM(
     input wire                  rst_in,
 
     // input from EX
-    input reg                   rdE_in,
-    input reg[`regIdxRange]     rdIdx_in,
-    input reg[`dataRange]       rdData_in,
+    input wire                   rdE_in,
+    input wire[`regIdxRange]     rdIdx_in,
+    input wire[`dataRange]       rdData_in,
 
     // output to MEM
     output reg                  rdE_out,
