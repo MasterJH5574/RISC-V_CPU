@@ -24,12 +24,14 @@ module EX(
 );
 
     reg[`dataRange] resLogic;
+    reg[`dataRange] resArith;
     reg[`dataRange] resOther;
 
 
     always @ (*) begin
         if (rst_in == `rstEnable) begin
             resLogic <= `ZERO32;
+            resArith <= `ZERO32;
             resOther <= `ZERO32;
         end else begin
             case (rdIdx_in)
@@ -62,8 +64,16 @@ module EX(
                 `idAND: begin                               // ANDI, AND
                     resLogic <= rs1Data_in & rs2Data_in;
                 end
+                `idADD: begin                               // ADDI, ADD
+                    resArith <= rs1Data_in + rs2Data_in;
+                end
+                `idSUB: begin                               // SUB
+                    resArith <= rs1Data_in - rs2Data_in;
+                end
                 default : begin
                     resLogic <= `ZERO32;
+                    resArith <= `ZERO32;
+                    resOther <= `ZERO32;
                 end
             endcase
         end
@@ -95,6 +105,9 @@ module EX(
             case (instType_in)
                 `typeLogic: begin
                     rdData_out <= resLogic;
+                end
+                `typeArith: begin
+                    rdData_out <= resArith;
                 end
                 `typeOther: begin
                     rdData_out <= resOther;

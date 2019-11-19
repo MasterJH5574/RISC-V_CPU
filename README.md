@@ -8,7 +8,7 @@
 
 ### Integer Computational Insturctions
 1. **Integer R-I Instructions**   
-    [0] ADDI  
+    [1] ADDI  
     [1] SLTI	(set less than imm)  
     [1] SLTIU  
     [1] XORI  
@@ -21,13 +21,13 @@
     [1] AUIPC	(add  upper imm to PC)
 
 2. **Integer R-R Instructions**  
-    [0] ADD  
-    [0] SUB  
+    [1] ADD  
+    [1] SUB  
     [1] SLT  
     [1] SLTU  
     [1] XOR  
     [0] SLL	(logical left shift)  
-    [0] SRL      (logical right shift)  
+    [0] SRL (logical right shift)  
     [0] SRA	(arthmetic right shift)  
     [1] OR  
     [1] AND

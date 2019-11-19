@@ -93,6 +93,11 @@ module ID(
                     reg2Idx_out <= `regNOP;
 
                     case (funct3)
+                        3'b000: begin                                   // ADDI, I-type
+                            instIdx_out     <= `idADD;
+                            instType_out    <= `typeArith;
+                            imm             <= {{20{inst_in[31]}}, inst_in[31:20]};
+                        end
                         3'b010: begin                                   // SLTI, I-type
                             instIdx_out     <= `idSLT;
                             instType_out    <= `typeOther;
@@ -143,6 +148,18 @@ module ID(
                     imm         <= `ZERO32;
 
                     case (funct3)
+                        3'b000: begin
+                            if (funct7 == 7'b0000000) begin             // ADD, R-type
+                                instIdx_out <= `idADD;
+                                instType_out<= `typeArith;
+                            end else if (funct7 == 7'b0100000) begin    // SUB, R-type
+                                instIdx_out <= `idSUB;
+                                instType_out<= `typeArith;
+                            end else begin
+                                instIdx_out <= `idNOP;
+                                instType_out<= `typeNOP;
+                            end
+                        end
                         3'b010: begin                                   // SLT, R-type
                             instIdx_out     <= `idSLT;
                             instType_out    <= `typeOther;
