@@ -5,9 +5,9 @@ module MEM_WB(
     input wire                  rst_in,
 
     // input from MEM
-    input wire                   rdE_in,
-    input wire[`regIdxRange]     rdIdx_in,
-    input wire[`dataRange]       rdData_in,
+    input wire                  rdE_in,
+    input wire[`regIdxRange]    rdIdx_in,
+    input wire[`dataRange]      rdData_in,
 
     // output to WB
     output reg                  rdE_out,

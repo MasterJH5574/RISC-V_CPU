@@ -5,14 +5,14 @@ module ID_EX(
     input wire                  rst_in,
 
     // input from ID
-    input wire                   rdE_in,
-    input wire[`regIdxRange]     rdIdx_in,
+    input wire                  rdE_in,
+    input wire[`regIdxRange]    rdIdx_in,
 
-    input wire[`instIdxRange]    instIdx_in,
-    input wire[`instTypeRange]   instType_in,
+    input wire[`instIdxRange]   instIdx_in,
+    input wire[`instTypeRange]  instType_in,
 
-    input wire[`dataRange]       rs1Data_in,
-    input wire[`dataRange]       rs2Data_in,
+    input wire[`dataRange]      rs1Data_in,
+    input wire[`dataRange]      rs2Data_in,
 
     // output to EX
     output reg                  rdE_out,

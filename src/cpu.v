@@ -29,10 +29,16 @@ module cpu(
     // link the PC to IF_ID
     wire[`addrRange] pc;
 
+    // link EX to PC for AUIPC
+    wire                AUIPCpcE_out;
+    wire[`addrRange]    AUIPCpcAddr_out;
+
     PC PC0(
         .clk_in(clk_in),
         .rst_in(rst_in),
         .rdy_in(rdy_in), // Todo
+        .AUIPCpcE_in(AUIPCpcE_out),
+        .AUIPCpcAddr_in(AUIPCpcAddr_out),
         .pc_out(pc)
     );
 
@@ -138,7 +144,9 @@ module cpu(
         .rs2Data_in(ID_EX_rs2Data_out),
         .rdE_out(EX_rdE_out),
         .rdIdx_out(EX_rdIdx_out),
-        .rdData_out(EX_rdData_out)
+        .rdData_out(EX_rdData_out),
+        .pcE_out(AUIPCpcE_out),
+        .pcAddr_out(AUIPCpcAddr_out)
     );
 
     // link EX_MEM to MEM

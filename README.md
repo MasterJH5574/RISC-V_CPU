@@ -18,7 +18,7 @@
     [0] SRLI	(logical right shift)  
     [0] SRAI	(arthmetic right shift)  
     [1] LUI	    (load upper imm)  
-    [0] AUIPC	(add  upper imm to PC)
+    [1] AUIPC	(add  upper imm to PC)
 
 2. **Integer R-R Instructions**  
     [0] ADD  

@@ -71,6 +71,18 @@ module ID(
                     instIdx_out <= `idLUI;
                     instType_out<= `typeOther;
                 end
+                `opAUIPC: begin                                     // AUIPC, U-type
+                    instValid   <= `instValid;
+                    reg1E_out   <= `readDisable;
+                    reg2E_out   <= `readDisable;
+                    reg1Idx_out <= `regNOP;
+                    reg2Idx_out <= `regNOP;
+                    rdE_out     <= `writeEnable;
+                    rdIdx_out   <= inst_in[11:7];
+                    imm         <= {inst_in[31:12], {12{1'b0}}};
+                    instIdx_out <= `idAUIPC;
+                    instType_out<= `typeOther;
+                end
                 `opRI: begin                                        // Reg-Imm
                     instValid   <= `instValid;
                     rdE_out     <= `writeEnable;
@@ -174,6 +186,8 @@ module ID(
     always @ (*) begin
         if (rst_in == `rstEnable) begin
             rs1Data_out <= `ZERO32;
+        end else if (opcode == `opAUIPC) begin
+            rs1Data_out <= pc_in;
         end else if (reg1E_out == `readEnable && EX_rdE_in == `writeEnable &&
             EX_rdIdx_in == reg1Idx_out) begin
             rs1Data_out <= EX_rdData_in;
@@ -192,6 +206,8 @@ module ID(
     always @ (*) begin
         if (rst_in == `rstEnable) begin
             rs2Data_out <= `ZERO32;
+        end else if (opcode == `opAUIPC) begin
+            rs2Data_out <= imm;
         end else if (reg2E_out == `readEnable && EX_rdE_in == `writeEnable &&
             EX_rdIdx_in == reg2Idx_out) begin
             rs2Data_out <= EX_rdData_in;
