@@ -69,7 +69,7 @@
 `define typeNOP         3'b000
 `define typeLogic       3'b001
 `define typeArith       3'b010
-`define typeSLT         3'b011
+`define typeOther       3'b011
 
 
 // ----------------- Enable & Disable ------------------

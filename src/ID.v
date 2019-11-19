@@ -59,6 +59,18 @@ module ID(
             imm             <= `ZERO32;
         end else begin
             case (opcode)
+                `opLUI: begin                                       // LUI, U-type
+                    instValid   <= `instValid;
+                    reg1E_out   <= `readDisable;
+                    reg2E_out   <= `readDisable;
+                    reg1Idx_out <= `regNOP;
+                    reg2Idx_out <= `regNOP;
+                    rdE_out     <= `writeEnable;
+                    rdIdx_out   <= inst_in[11:7];
+                    imm         <= {inst_in[31:12], {12{1'b0}}};
+                    instIdx_out <= `idLUI;
+                    instType_out<= `typeOther;
+                end
                 `opRI: begin                                        // Reg-Imm
                     instValid   <= `instValid;
                     rdE_out     <= `writeEnable;
@@ -71,12 +83,12 @@ module ID(
                     case (funct3)
                         3'b010: begin                                   // SLTI, I-type
                             instIdx_out     <= `idSLT;
-                            instType_out    <= `typeSLT;
+                            instType_out    <= `typeOther;
                             imm             <= {{20{inst_in[31]}}, inst_in[31:20]};
                         end
                         3'b011: begin                                   // SLTIU, I_type
                             instIdx_out     <= `idSLTU;
-                            instType_out    <= `typeSLT;
+                            instType_out    <= `typeOther;
                             imm             <= {{20{inst_in[31]}}, inst_in[31:20]};
                         end
                         3'b100: begin                                   // XORI, I-type
@@ -121,11 +133,11 @@ module ID(
                     case (funct3)
                         3'b010: begin                                   // SLT, R-type
                             instIdx_out     <= `idSLT;
-                            instType_out    <= `typeSLT;
+                            instType_out    <= `typeOther;
                         end
                         3'b011: begin                                   // SLTU, R-type
                             instIdx_out     <= `idSLTU;
-                            instType_out    <= `typeSLT;
+                            instType_out    <= `typeOther;
                         end
                         3'b100: begin                                   // XOR, R-type
                             instIdx_out     <= `idXOR;
@@ -171,7 +183,7 @@ module ID(
         end else if (reg1E_out == `readEnable) begin
             rs1Data_out <= reg1Data_in;
         end else if (reg1E_out == `readDisable) begin
-            rs1Data_out <= imm;  // Todo: why "rs1Data_out <= imm"?
+            rs1Data_out <= imm;  // Todo: why "rs1Data_out <= imm"? For LUI?
         end else begin
             rs1Data_out <= `ZERO32;
         end

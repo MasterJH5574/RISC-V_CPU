@@ -20,7 +20,7 @@ module EX(
 );
 
     reg[`dataRange] resLogic;
-    reg             resSLT;
+    reg             resOther;
 
 
     always @ (*) begin
@@ -28,18 +28,21 @@ module EX(
             resLogic <= `ZERO32;
         end else begin
             case (rdIdx_in)
+                `idLUI: begin
+                    resOther <= rs1Data_in;
+                end
                 `idSLT: begin                               // SLTI, SLT
                     if ($signed(rs1Data_in) < $signed(rs2Data_in)) begin
-                        resSLT <= 1'b1;
+                        resOther <= 1'b1;
                     end else begin
-                        resSLT <= 1'b0;
+                        resOther <= 1'b0;
                     end
                 end
                 `idSLTU: begin                              // SLTIU, SLTU
                     if (rs1Data_in < rs2Data_in) begin
-                        resSLT <= 1'b1;
+                        resOther <= 1'b1;
                     end else begin
-                        resSLT <= 1'b0;
+                        resOther <= 1'b0;
                     end
                 end
                 `idXOR: begin                               // XORI, XOR
@@ -67,8 +70,8 @@ module EX(
             `typeLogic: begin
                 rdData_out <= resLogic;
             end
-            `typeSLT: begin
-                rdData_out <= resSLT;
+            `typeOther: begin
+                rdData_out <= resOther;
             end
             default : begin
                 rdData_out <= `ZERO32;
