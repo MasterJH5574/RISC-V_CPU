@@ -14,9 +14,9 @@
     [1] XORI  
     [1] ORI  
     [1] ANDI  
-    [0] SLLI	(logical left shift)  
-    [0] SRLI	(logical right shift)  
-    [0] SRAI	(arthmetic right shift)  
+    [1] SLLI	(logical left shift)  
+    [1] SRLI	(logical right shift)  
+    [1] SRAI	(arthmetic right shift)  
     [1] LUI	    (load upper imm)  
     [1] AUIPC	(add  upper imm to PC)
 
@@ -26,9 +26,9 @@
     [1] SLT  
     [1] SLTU  
     [1] XOR  
-    [0] SLL	(logical left shift)  
-    [0] SRL (logical right shift)  
-    [0] SRA	(arthmetic right shift)  
+    [1] SLL	(logical left shift)  
+    [1] SRL (logical right shift)  
+    [1] SRA	(arthmetic right shift)  
     [1] OR  
     [1] AND
 

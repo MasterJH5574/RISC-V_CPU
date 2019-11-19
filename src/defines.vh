@@ -46,9 +46,6 @@
 `define idSB            6'b010000
 `define idSH            6'b010001
 `define idSW            6'b010010
-`define idSLLI          6'b011001
-`define idSRLI          6'b011010
-`define idSRAI          6'b011011
 `define idADD           6'b011100
 `define idSUB           6'b011101
 `define idSLL           6'b011110
@@ -68,7 +65,8 @@
 `define typeNOP         3'b000
 `define typeLogic       3'b001
 `define typeArith       3'b010
-`define typeOther       3'b011
+`define typeShift       3'b011
+`define typeOther       3'b100
 
 
 // ----------------- Enable & Disable ------------------

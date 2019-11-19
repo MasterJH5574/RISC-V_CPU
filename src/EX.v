@@ -25,6 +25,7 @@ module EX(
 
     reg[`dataRange] resLogic;
     reg[`dataRange] resArith;
+    reg[`dataRange] resShift;
     reg[`dataRange] resOther;
 
 
@@ -32,13 +33,14 @@ module EX(
         if (rst_in == `rstEnable) begin
             resLogic <= `ZERO32;
             resArith <= `ZERO32;
+            resShift <= `ZERO32;
             resOther <= `ZERO32;
         end else begin
             case (rdIdx_in)
-                `idLUI: begin
+                `idLUI: begin                               // LUI
                     resOther <= rs1Data_in;
                 end
-                `idAUIPC: begin
+                `idAUIPC: begin                             // AUIPC
                     resOther <= rs1Data_in + rs2Data_in;
                 end
                 `idSLT: begin                               // SLTI, SLT
@@ -70,9 +72,19 @@ module EX(
                 `idSUB: begin                               // SUB
                     resArith <= rs1Data_in - rs2Data_in;
                 end
+                `idSLL: begin                               // SLLI, SLL
+                    resShift <= rs1Data_in << rs2Data_in;
+                end
+                `idSRL: begin                               // SRLI, SRL
+                    resShift <= rs1Data_in >> rs2Data_in;
+                end
+                `idSRA: begin                               // SRAI, SRA
+                    resShift <= rs1Data_in >>> rs2Data_in;
+                end
                 default : begin
                     resLogic <= `ZERO32;
                     resArith <= `ZERO32;
+                    resShift <= `ZERO32;
                     resOther <= `ZERO32;
                 end
             endcase
@@ -108,6 +120,9 @@ module EX(
                 end
                 `typeArith: begin
                     rdData_out <= resArith;
+                end
+                `typeShift: begin
+                    rdData_out <= resShift;
                 end
                 `typeOther: begin
                     rdData_out <= resOther;

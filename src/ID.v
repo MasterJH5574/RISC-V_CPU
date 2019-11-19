@@ -123,6 +123,26 @@ module ID(
                             instType_out    <= `typeLogic;
                             imm             <= {{20{inst_in[31]}}, inst_in[31:20]};
                         end
+                        3'b001: begin                                   // SLLI, I-type
+                            instIdx_out     <= `idSLL;
+                            instType_out    <= `typeShift;
+                            imm             <= inst_in[24:20];
+                        end
+                        3'b101: begin
+                            if (funct7[5] == 1'b0) begin                // SRLI, I-type
+                                instIdx_out <= `idSRL;
+                                instType_out<= `typeShift;
+                                imm         <= inst_in[24:20];
+                            end else if (funct7[5] == 1'b1) begin       // SRAI, I-type
+                                instIdx_out <= `idSRA;
+                                instType_out<= `typeShift;
+                                imm         <= inst_in[24:20];
+                            end else begin
+                                instIdx_out <= `idNOP;
+                                instType_out<= `typeNOP;
+                                imm         <= `ZERO32;
+                            end
+                        end
                         default : begin
                             instIdx_out     <= `idNOP;
                             instType_out    <= `typeNOP;
@@ -149,10 +169,10 @@ module ID(
 
                     case (funct3)
                         3'b000: begin
-                            if (funct7 == 7'b0000000) begin             // ADD, R-type
+                            if (funct7[5] == 1'b0) begin                // ADD, R-type
                                 instIdx_out <= `idADD;
                                 instType_out<= `typeArith;
-                            end else if (funct7 == 7'b0100000) begin    // SUB, R-type
+                            end else if (funct7[5] == 1'b1) begin       // SUB, R-type
                                 instIdx_out <= `idSUB;
                                 instType_out<= `typeArith;
                             end else begin
@@ -179,6 +199,22 @@ module ID(
                         3'b111: begin                                   // AND, R-type
                             instIdx_out     <= `idAND;
                             instType_out    <= `typeLogic;
+                        end
+                        3'b001: begin                                   // SLL, R-type
+                            instIdx_out     <= `idSLL;
+                            instType_out    <= `typeShift;
+                        end
+                        3'b101: begin
+                            if (funct7[5] == 1'b0) begin                // SRL, R-type
+                                instIdx_out <= `idSRL;
+                                instType_out<= `typeShift;
+                            end else if (funct7[5] == 1'b1) begin       // SRA, R-type
+                                instIdx_out <= `idSRA;
+                                instType_out<= `typeShift;
+                            end else begin
+                                instIdx_out <= `idNOP;
+                                instType_out<= `typeNOP;
+                            end
                         end
                     endcase
                 end
@@ -214,7 +250,7 @@ module ID(
         end else if (reg1E_out == `readEnable) begin
             rs1Data_out <= reg1Data_in;
         end else if (reg1E_out == `readDisable) begin
-            rs1Data_out <= imm;  // Todo: why "rs1Data_out <= imm"? For LUI?
+            rs1Data_out <= imm;
         end else begin
             rs1Data_out <= `ZERO32;
         end
@@ -225,6 +261,8 @@ module ID(
             rs2Data_out <= `ZERO32;
         end else if (opcode == `opAUIPC) begin
             rs2Data_out <= imm;
+        end else if (opcode == `opRR && (funct3 == 3'b001 || funct3 == 3'b101)) begin // for shamt
+            rs2Data_out <= reg2Data_in[4:0];
         end else if (reg2E_out == `readEnable && EX_rdE_in == `writeEnable &&
             EX_rdIdx_in == reg2Idx_out) begin
             rs2Data_out <= EX_rdData_in;
@@ -234,7 +272,7 @@ module ID(
         end else if (reg2E_out == `readEnable) begin
             rs2Data_out <= reg2Data_in;
         end else if (reg2E_out == `readDisable) begin
-            rs2Data_out <= imm;  // Todo: why "rs2Data_oujt <= imm"?
+            rs2Data_out <= imm;
         end else begin
             rs2Data_out <= `ZERO32;
         end
