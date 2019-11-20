@@ -4,6 +4,9 @@ module ID_EX(
     input wire                  clk_in,
     input wire                  rst_in,
 
+    // stall or not
+    input wire[`stallRange]     stall_in,
+
     // input from ID
     input wire                  rdE_in,
     input wire[`regIdxRange]    rdIdx_in,
@@ -34,13 +37,22 @@ module ID_EX(
             rs2Data_out     <= `ZERO32;
             rdE_out         <= `writeDisable;
             rdIdx_out       <= `regNOP;
-        end else begin
+        end else if (stall_in[2] == `Stall && stall_in[3] == `NoStall) begin
+            instIdx_out     <= `idNOP;
+            instType_out    <= `typeNOP;
+            rs1Data_out     <= `ZERO32;
+            rs2Data_out     <= `ZERO32;
+            rdE_out         <= `writeDisable;
+            rdIdx_out       <= `regNOP;
+        end else if (stall_in[2] == `NoStall) begin
             instIdx_out     <= instIdx_in;
             instType_out    <= instType_in;
             rs1Data_out     <= rs1Data_in;
             rs2Data_out     <= rs2Data_in;
             rdE_out         <= rdE_in;
             rdIdx_out       <= rdIdx_in;
+        end else begin
+            // do nothing
         end
     end
 

@@ -11,8 +11,10 @@ module MEM(
     // output to MEM_WB
     output reg                  rdE_out,
     output reg[`regIdxRange]    rdIdx_out,
-    output reg[`dataRange]      rdData_out
+    output reg[`dataRange]      rdData_out,
 
+    // stall request
+    output reg                  memStall_out
 );
 
     always @ (*) begin
@@ -20,10 +22,12 @@ module MEM(
             rdE_out     <= `writeDisable;
             rdIdx_out   <= `regNOP;
             rdData_out  <= `ZERO32;
+            memStall_out <= `NoStall;
         end else begin
             rdE_out     <= rdE_in;
             rdIdx_out   <= rdIdx_in;
             rdData_out  <= rdData_in;
+            memStall_out <= `NoStall;
         end
     end
 

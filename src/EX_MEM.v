@@ -4,6 +4,9 @@ module EX_MEM(
     input wire                  clk_in,
     input wire                  rst_in,
 
+    // stall or not
+    input wire[`stallRange]     stall_in,
+
     // input from EX
     input wire                  rdE_in,
     input wire[`regIdxRange]    rdIdx_in,
@@ -20,10 +23,16 @@ module EX_MEM(
             rdE_out     <= `writeDisable;
             rdIdx_out   <= `regNOP;
             rdData_out  <= `ZERO32;
-        end else begin
+        end else if (stall_in[3] == `Stall && stall_in[4] == `NoStall) begin
+            rdE_out     <= `writeDisable;
+            rdIdx_out   <= `regNOP;
+            rdData_out  <= `ZERO32;
+        end else if (stall_in[3] == `NoStall) begin
             rdE_out     <= rdE_in;
             rdIdx_out   <= rdIdx_in;
             rdData_out  <= rdData_in;
+        end else begin
+            // do nothing
         end
 
     end

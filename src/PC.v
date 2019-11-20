@@ -5,13 +5,11 @@ module PC (
     input wire                  rst_in,
     input wire                  rdy_in,
 
-    // input from EX when AUIPC
-    input wire                  AUIPCpcE_in,
-    input wire[`addrRange]      AUIPCpcAddr_in,
+    // stall or not
+    input wire[`stallRange]     stall_in,
 
     // output to IF_ID
     output reg[`addrRange]      pc_out
-//    output reg                  ce_out
 );
 
     reg ce;
@@ -26,10 +24,10 @@ module PC (
     always @ (posedge clk_in) begin
         if (ce == `chipDisable) begin
             pc_out = `ZERO32;
-        end else if (AUIPCpcE_in == `writeEnable) begin
-            pc_out = AUIPCpcAddr_in;
-        end else begin
+        end else if (stall_in[0] == `NoStall) begin // Todo: Modify
             pc_out = pc_out + `PCSTEP;
+        end else begin
+            // do nothing
         end
     end
 

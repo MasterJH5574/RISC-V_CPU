@@ -32,8 +32,10 @@ module ID(
     output reg[`instTypeRange]  instType_out,
 
     output reg[`dataRange]      rs1Data_out,
-    output reg[`dataRange]      rs2Data_out
+    output reg[`dataRange]      rs2Data_out,
 
+    // stall request
+    output reg                  idStall_out
 );
 
     wire[6:0] opcode = inst_in[6:0];

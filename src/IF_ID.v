@@ -4,6 +4,9 @@ module IF_ID(
     input wire                  clk_in,
     input wire                  rst_in,
 
+    // stall or not
+    input wire[`stallRange]     stall_in,
+
     // input from pc & RAM
     input wire[`addrRange]      pc_in,
     input wire[`instRange]      inst_in,
@@ -17,9 +20,14 @@ module IF_ID(
         if (rst_in == `rstEnable) begin
             pc_out <= `ZERO32;
             inst_out <= `ZERO32;
-        end else begin
+        end else if (stall_in[1] == `Stall && stall_in[2] == `NoStall) begin
+            pc_out <= `ZERO32;
+            inst_out <= `ZERO32;
+        end else if (stall_in[1] == `NoStall) begin
             pc_out <= pc_in;
             inst_out <= inst_in;
+        end else begin
+            // do nothing
         end
     end
 endmodule : IF_ID

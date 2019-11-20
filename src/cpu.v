@@ -26,20 +26,44 @@ module cpu(
 // - 0x30004 read: read clocks passed since cpu starts (in dword, 4 bytes)
 // - 0x30004 write: indicates program stop (will output '\0' through uart tx)
 
-    // link the PC to IF_ID
-    wire[`addrRange] pc;
+    // link the PC to IF
+    wire[`addrRange] PC_pc_out;
 
-    // link EX to PC for AUIPC
-    wire                AUIPCpcE_out;
-    wire[`addrRange]    AUIPCpcAddr_out;
+    // stall controller
+    wire ifStall, idStall, memStall; // send request
+    wire stall_out;
+    stallCtrl stallCtrl0(
+        .rst_in(rst_in),
+        .ifStall_in(ifStall),
+        .idStall_in(idStall),
+        .memStall_in(memStall),
+        .stall_out(stall_out)
+    );
 
     PC PC0(
         .clk_in(clk_in),
         .rst_in(rst_in),
         .rdy_in(rdy_in), // Todo
-        .AUIPCpcE_in(AUIPCpcE_out),
-        .AUIPCpcAddr_in(AUIPCpcAddr_out),
-        .pc_out(pc)
+        .stall_in(stall_out),
+        .pc_out(PC_pc_out)
+    );
+
+    // count clock for IF
+    wire[`stallCntRange] IF_cnt_in;
+    wire[`stallCntRange] IF_cnt_out;
+
+    // link IF to IF_ID
+    wire[`addrRange] IF_pc_out;
+    wire[`instRange] IF_inst_out;
+
+    IF IF0(
+        .rst_in(rst_in),
+        .pc_in(PC_pc_out),
+        .cnt_in(IF_cnt_in),
+        .cnt_out(IF_cnt_out),
+        .pc_out(IF_pc_out),
+        .inst_out(IF_inst_out),
+        .ifStall_out(ifStall)
     );
 
     // link IF_ID to ID
@@ -49,6 +73,7 @@ module cpu(
     IF_ID IF_ID0(
         .clk_in(clk_in),
         .rst_in(rst_in),
+        .stall_in(stall_out),
         .pc_in(pc),
         .inst_in(mem_din),
         .pc_out(IF_ID_pc_out),
@@ -106,7 +131,8 @@ module cpu(
         .instIdx_out(ID_instIdx_out),
         .instType_out(ID_instType_out),
         .rs1Data_out(ID_rs1Data_out),
-        .rs2Data_out(ID_rs2Data_out)
+        .rs2Data_out(ID_rs2Data_out),
+        .idStall_out(idStall)
     );
 
     // link ID_EX to EX
@@ -120,6 +146,7 @@ module cpu(
     ID_EX ID_EX0(
         .clk_in(clk_in),
         .rst_in(rst_in),
+        .stall_in(stall_out),
         .rdE_in(ID_rdE_out),
         .rdIdx_out(ID_rdIdx_out),
         .instIdx_in(ID_instIdx_out),
@@ -144,9 +171,7 @@ module cpu(
         .rs2Data_in(ID_EX_rs2Data_out),
         .rdE_out(EX_rdE_out),
         .rdIdx_out(EX_rdIdx_out),
-        .rdData_out(EX_rdData_out),
-        .pcE_out(AUIPCpcE_out),
-        .pcAddr_out(AUIPCpcAddr_out)
+        .rdData_out(EX_rdData_out)
     );
 
     // link EX_MEM to MEM
@@ -157,6 +182,7 @@ module cpu(
     EX_MEM EX_MEM0(
         .clk_in(clk_in),
         .rst_in(rst_in),
+        .stall_in(stall_out),
         .rdE_in(EX_rdE_out),
         .rdIdx_in(EX_rdIdx_out),
         .rdData_in(EX_rdIdx_out),
@@ -172,7 +198,8 @@ module cpu(
         .rdData_in(EX_MEM_rdData_out),
         .rdE_out(MEM_rdE_out),
         .rdIdx_out(MEM_rdIdx_out),
-        .rdData_out(MEM_rdData_out)
+        .rdData_out(MEM_rdData_out),
+        .memStall_out(memStall)
     );
 
     // link MEM_WB to RegFile
@@ -183,6 +210,7 @@ module cpu(
     MEM_WB MEM_WB0(
         .clk_in(clk_in),
         .rst_in(rst_in),
+        .stall_in(stall_out),
         .rdE_in(MEM_rdE_out),
         .rdIdx_in(MEM_rdIdx_out),
         .rdData_in(MEM_rdData_out),
@@ -204,22 +232,4 @@ module cpu(
         .reg1Data_out(RegFile_reg1Data_out),
         .reg2Data_out(RegFile_reg2Data_out)
     );
-
-    /*
-    always @(posedge clk_in)
-        begin
-            if (rst_in)
-                begin
-
-                end
-            else if (!rdy_in)
-                begin
-
-                end
-            else
-                begin
-
-                end
-        end
-    */
 endmodule : cpu

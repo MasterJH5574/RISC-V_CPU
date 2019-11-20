@@ -85,6 +85,9 @@
 
 //------------------ Hardware Properties ----------------
 
+`define addrBusWidth    8
+`define addrBusRange    7:0
+
 `define addrWidth       32
 `define addrRange       31:0
 
@@ -103,5 +106,15 @@
 `define regIdxRange     4:1
 
 `define regNOP          5'b00000
+
+//----------------- STALL -----------------
+
+`define stallRange      5:0
+`define stallCntRange   2:0
+
+`define Stall           1'b1
+`define NoStall         1'b0
+
+
 
 `endif

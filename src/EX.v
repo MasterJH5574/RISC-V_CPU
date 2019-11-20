@@ -16,11 +16,7 @@ module EX(
 
     output reg                  rdE_out,
     output reg[`regIdxRange]    rdIdx_out,
-    output reg[`dataRange]      rdData_out,
-
-    // output to PC for AUIPC
-    output reg                  pcE_out,
-    output reg[`addrRange]      pcAddr_out
+    output reg[`dataRange]      rdData_out
 );
 
     reg[`dataRange] resLogic;
@@ -90,20 +86,6 @@ module EX(
             endcase
         end
 
-    end
-
-    // output to PC for AUIPC
-    always @ (*) begin
-        if (rst_in == `rstEnable) begin
-            pcE_out     <= `writeDisable;
-            pcAddr_out  <= `ZERO32;
-        end else if (instIdx_in == `idAUIPC) begin
-            pcE_out     <= `writeEnable;
-            pcAddr_out  <= resOther;
-        end else begin
-            pcE_out     <= `writeDisable;
-            pcAddr_out  <= `ZERO32;
-        end
     end
 
     always @ (*) begin              // Todo: handle rst_in?
