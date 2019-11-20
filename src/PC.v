@@ -8,6 +8,10 @@ module PC (
     // stall or not
     input wire[`stallRange]     stall_in,
 
+    // pc change target for Jump and Branch
+    input wire                  pcJump_in,
+    input wire[`addrRange]      pcTarget_in,
+
     // output to IF_ID
     output reg[`addrRange]      pc_out
 );
@@ -23,9 +27,15 @@ module PC (
 
     always @ (posedge clk_in) begin
         if (ce == `chipDisable) begin
-            pc_out = `ZERO32;
+            pc_out <= `ZERO32;
         end else if (stall_in[0] == `NoStall) begin // Todo: Modify
-            pc_out = pc_out + `PCSTEP;
+            if (pcJump_in == `Jump) begin
+                pc_out <= pcTarget_in;
+            end else if (pcJump_in == `NoJump) begin
+                pc_out <= pc_out + `PCSTEP;
+            end else begin
+                pc_out <= `ZERO32;
+            end
         end else begin
             // do nothing
         end

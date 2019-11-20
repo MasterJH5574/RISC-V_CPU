@@ -1,3 +1,5 @@
+`include "defines.vh"
+
 module stallCtrl(
     input wire                  rst_in,
 

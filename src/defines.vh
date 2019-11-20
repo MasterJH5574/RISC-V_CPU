@@ -62,11 +62,8 @@
 `define instTypeWidth   3
 `define instTypeRange   2:0
 
-`define typeNOP         3'b000
-`define typeLogic       3'b001
-`define typeArith       3'b010
-`define typeShift       3'b011
-`define typeOther       3'b100
+`define typeNOP         1'b0
+`define typeValid       1'b1
 
 
 // ----------------- Enable & Disable ------------------
@@ -115,6 +112,9 @@
 `define Stall           1'b1
 `define NoStall         1'b0
 
+//----------------- JUMP -------------------
+`define Jump            1'b1
+`define NoJump          1'b0
 
 
 `endif

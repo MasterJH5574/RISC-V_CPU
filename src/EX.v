@@ -3,6 +3,8 @@
 module EX(
     input wire                  rst_in,
 
+    // input from ID_EX
+    input wire[`addrRange]      pc_in,
 
     input wire                  rdE_in,
     input wire[`regIdxRange]    rdIdx_in,
@@ -12,107 +14,185 @@ module EX(
 
     input wire[`dataRange]      rs1Data_in,
     input wire[`dataRange]      rs2Data_in,
+    input wire[`dataRange]      immData_in,
 
-
+    // output to EX_MEM
     output reg                  rdE_out,
     output reg[`regIdxRange]    rdIdx_out,
-    output reg[`dataRange]      rdData_out
+    output reg[`dataRange]      rdData_out,
+
+    // output to PC for jump and branch
+    output reg                  pcJump_out,
+    output reg[`addrRange]      pcTarget_out
 );
 
-    reg[`dataRange] resLogic;
-    reg[`dataRange] resArith;
-    reg[`dataRange] resShift;
-    reg[`dataRange] resOther;
+    reg[`dataRange] res;
 
 
     always @ (*) begin
         if (rst_in == `rstEnable) begin
-            resLogic <= `ZERO32;
-            resArith <= `ZERO32;
-            resShift <= `ZERO32;
-            resOther <= `ZERO32;
+            res             <= `ZERO32;
+            pcJump_out      <= `NoJump;
+            pcTarget_out    <= `ZERO32;
         end else begin
             case (rdIdx_in)
                 `idLUI: begin                               // LUI
-                    resOther <= rs1Data_in;
+                    res             <= rs1Data_in;
+                    pcJump_out      <= `NoJump;
+                    pcTarget_out    <= `ZERO32;
                 end
                 `idAUIPC: begin                             // AUIPC
-                    resOther <= rs1Data_in + rs2Data_in;
+                    res             <= pc_in + immData_in;
+                    pcJump_out      <= `NoJump;
+                    pcTarget_out    <= `ZERO32;
+                end
+                `idJAL: begin                               // JAL
+                    res             <= pc_in + `PCSTEP;
+                    pcJump_out      <= `Jump;
+                    pcTarget_out    <= pc_in + immData_in;
+                end
+                `idJALR: begin                              // JALR
+                    res             <= pc_in + `PCSTEP;
+                    pcJump_out      <= `Jump;
+                    pcTarget_out    <= (rs1Data_in + immData_in) & 32'hFFFFFFFE;
+                end
+                `idBEQ: begin                               // BEQ
+                    res             <= `ZERO32;
+                    if (rs1Data_in == rs2Data_in) begin
+                        pcJump_out  <= `Jump;
+                        pcTarget_out<= pc_in + immData_in;
+                    end else begin
+                        pcJump_out  <= `NoJump;
+                        pcTarget_out<= `ZERO32;
+                    end
+                end
+                `idBNE: begin                               // BNE
+                    res             <= `ZERO32;
+                    if (rs1Data_in != rs2Data_in) begin
+                        pcJump_out  <= `Jump;
+                        pcTarget_out<= pc_in + immData_in;
+                    end else begin
+                        pcJump_out  <= `NoJump;
+                        pcTarget_out<= `ZERO32;
+                    end
+                end
+                `idBLT: begin                               // BLT
+                    res             <= `ZERO32;
+                    if ($signed(rs1Data_in) < $signed(rs2Data_in)) begin
+                        pcJump_out  <= `Jump;
+                        pcTarget_out<= pc_in + immData_in;
+                    end else begin
+                        pcJump_out  <= `NoJump;
+                        pcTarget_out<= `ZERO32;
+                    end
+                end
+                `idBGE: begin                               // BGE
+                    res             <= `ZERO32;
+                    if ($signed(rs1Data_in) >= $signed(rs2Data_in)) begin
+                        pcJump_out  <= `Jump;
+                        pcTarget_out<= pc_in + immData_in;
+                    end else begin
+                        pcJump_out  <= `NoJump;
+                        pcTarget_out<= `ZERO32;
+                    end
+                end
+                `idBLTU: begin                              // BLTU
+                    res             <= `ZERO32;
+                    if (rs1Data_in < rs2Data_in) begin
+                        pcJump_out  <= `Jump;
+                        pcTarget_out<= pc_in + immData_in;
+                    end else begin
+                        pcJump_out  <= `NoJump;
+                        pcTarget_out<= `ZERO32;
+                    end
+                end
+                `idBGEU: begin                              // BGEU
+                    res             <= `ZERO32;
+                    if (rs1Data_in < rs2Data_in) begin
+                        pcJump_out  <= `Jump;
+                        pcTarget_out<= pc_in + immData_in;
+                    end else begin
+                        pcJump_out  <= `NoJump;
+                        pcTarget_out<= `ZERO32;
+                    end
                 end
                 `idSLT: begin                               // SLTI, SLT
                     if ($signed(rs1Data_in) < $signed(rs2Data_in)) begin
-                        resOther <= 1'b1;
+                        res <= 1'b1;
                     end else begin
-                        resOther <= 1'b0;
+                        res <= 1'b0;
                     end
+                    pcJump_out      <= `NoJump;
+                    pcTarget_out    <= `ZERO32;
                 end
                 `idSLTU: begin                              // SLTIU, SLTU
                     if (rs1Data_in < rs2Data_in) begin
-                        resOther <= 1'b1;
+                        res         <= 1'b1;
                     end else begin
-                        resOther <= 1'b0;
+                        res         <= 1'b0;
                     end
+                    pcJump_out      <= `NoJump;
+                    pcTarget_out    <= `ZERO32;
                 end
                 `idXOR: begin                               // XORI, XOR
-                    resLogic <= rs1Data_in ^ rs2Data_in;
+                    res             <= rs1Data_in ^ rs2Data_in;
+                    pcJump_out      <= `NoJump;
+                    pcTarget_out    <= `ZERO32;
                 end
                 `idOR: begin                                // ORI, OR
-                    resLogic <= rs1Data_in | rs2Data_in;
+                    res             <= rs1Data_in | rs2Data_in;
+                    pcJump_out      <= `NoJump;
+                    pcTarget_out    <= `ZERO32;
                 end
                 `idAND: begin                               // ANDI, AND
-                    resLogic <= rs1Data_in & rs2Data_in;
+                    res             <= rs1Data_in & rs2Data_in;
+                    pcJump_out      <= `NoJump;
+                    pcTarget_out    <= `ZERO32;
                 end
                 `idADD: begin                               // ADDI, ADD
-                    resArith <= rs1Data_in + rs2Data_in;
+                    res             <= rs1Data_in + rs2Data_in;
+                    pcJump_out      <= `NoJump;
+                    pcTarget_out    <= `ZERO32;
                 end
                 `idSUB: begin                               // SUB
-                    resArith <= rs1Data_in - rs2Data_in;
+                    res             <= rs1Data_in - rs2Data_in;
+                    pcJump_out      <= `NoJump;
+                    pcTarget_out    <= `ZERO32;
                 end
                 `idSLL: begin                               // SLLI, SLL
-                    resShift <= rs1Data_in << rs2Data_in;
+                    res             <= rs1Data_in << rs2Data_in[4:0];
+                    pcJump_out      <= `NoJump;
+                    pcTarget_out    <= `ZERO32;
                 end
                 `idSRL: begin                               // SRLI, SRL
-                    resShift <= rs1Data_in >> rs2Data_in;
+                    res             <= rs1Data_in >> rs2Data_in[4:0];
+                    pcJump_out      <= `NoJump;
+                    pcTarget_out    <= `ZERO32;
                 end
                 `idSRA: begin                               // SRAI, SRA
-                    resShift <= rs1Data_in >>> rs2Data_in;
+                    res             <= rs1Data_in >>> rs2Data_in[4:0];
+                    pcJump_out      <= `NoJump;
+                    pcTarget_out    <= `ZERO32;
                 end
                 default : begin
-                    resLogic <= `ZERO32;
-                    resArith <= `ZERO32;
-                    resShift <= `ZERO32;
-                    resOther <= `ZERO32;
+                    res             <= `ZERO32;
+                    pcJump_out      <= `NoJump;
+                    pcTarget_out    <= `ZERO32;
                 end
             endcase
         end
 
     end
 
-    always @ (*) begin              // Todo: handle rst_in?
+    always @ (*) begin
         if (rst_in == `rstEnable) begin
             rdE_out     <= `writeDisable;
             rdIdx_out   <= `regNOP;
             rdData_out  <= `ZERO32;
-        end else begin
+        end else if (instType_in == `typeValid) begin
             rdE_out     <= rdE_in;
             rdIdx_out   <= rdIdx_in;
-            case (instType_in)
-                `typeLogic: begin
-                    rdData_out <= resLogic;
-                end
-                `typeArith: begin
-                    rdData_out <= resArith;
-                end
-                `typeShift: begin
-                    rdData_out <= resShift;
-                end
-                `typeOther: begin
-                    rdData_out <= resOther;
-                end
-                default : begin
-                    rdData_out <= `ZERO32;
-                end
-            endcase
+            rdData_out  <= res;
         end
     end
 

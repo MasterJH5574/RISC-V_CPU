@@ -25,6 +25,8 @@ module ID(
     output reg[`regIdxRange]    reg2Idx_out,
 
     // output to ID_EX
+    output reg[`addrRange]      pc_out,
+
     output reg                  rdE_out,
     output reg[`regIdxRange]    rdIdx_out,
 
@@ -33,6 +35,7 @@ module ID(
 
     output reg[`dataRange]      rs1Data_out,
     output reg[`dataRange]      rs2Data_out,
+    output reg[`dataRange]      immData_out,
 
     // stall request
     output reg                  idStall_out
@@ -42,7 +45,6 @@ module ID(
     wire[2:0] funct3 = inst_in[14:12];
     wire[6:0] funct7 = inst_in[31:25];
 
-    reg[`dataRange] imm;
     reg instValid;              // Todo: usage of instValid?
 
     // ---------------- DECODE -------------------
@@ -58,7 +60,7 @@ module ID(
             reg2E_out       <= `readDisable;
             reg1Idx_out     <= `regNOP;
             reg2Idx_out     <= `regNOP;
-            imm             <= `ZERO32;
+            immData_out     <= `ZERO32;
         end else begin
             case (opcode)
                 `opLUI: begin                                       // LUI, U-type
@@ -69,9 +71,9 @@ module ID(
                     reg2Idx_out <= `regNOP;
                     rdE_out     <= `writeEnable;
                     rdIdx_out   <= inst_in[11:7];
-                    imm         <= {inst_in[31:12], {12{1'b0}}};
+                    immData_out <= {inst_in[31:12], {12{1'b0}}};
                     instIdx_out <= `idLUI;
-                    instType_out<= `typeOther;
+                    instType_out<= `typeValid;
                 end
                 `opAUIPC: begin                                     // AUIPC, U-type
                     instValid   <= `instValid;
@@ -81,9 +83,82 @@ module ID(
                     reg2Idx_out <= `regNOP;
                     rdE_out     <= `writeEnable;
                     rdIdx_out   <= inst_in[11:7];
-                    imm         <= {inst_in[31:12], {12{1'b0}}};
+                    immData_out <= {inst_in[31:12], {12{1'b0}}};
                     instIdx_out <= `idAUIPC;
-                    instType_out<= `typeOther;
+                    instType_out<= `typeValid;
+                end
+                `opJAL: begin                                       // JAL, J-type
+                    instValid   <= `instValid;
+                    reg1E_out   <= `readDisable;
+                    reg2E_out   <= `readDisable;
+                    reg1Idx_out <= `regNOP;
+                    reg2Idx_out <= `regNOP;
+                    rdE_out     <= `writeEnable;
+                    rdIdx_out   <= inst_in[11:7];
+                    immData_out <= {{12{inst_in[31]}}, inst_in[19:12],
+                                    inst_in[20], inst_in[30:25], inst_in[24:21], 1'b0};
+                    instIdx_out <= `idJAL;
+                    instType_out<= `typeValid;
+                end
+                `opJALR: begin                                      // JALR, I-type
+                    instValid   <= `instValid;
+                    reg1E_out   <= `readEnable;
+                    reg2E_out   <= `readDisable;
+                    reg1Idx_out <= inst_in[19:15];
+                    reg2Idx_out <= `regNOP;
+                    rdE_out     <= `writeEnable;
+                    rdIdx_out   <= inst_in[11:7];
+                    immData_out <= {{20{inst_in[31]}}, inst_in[31:20]};
+                    instIdx_out <= `idJALR;
+                    instType_out<= `typeValid;
+                end
+                `opBranch: begin
+                    instValid   <= `instValid;
+                    reg1E_out   <= `readEnable;
+                    reg2E_out   <= `readEnable;
+                    reg1Idx_out <= inst_in[19:15];
+                    reg2Idx_out <= inst_in[24:20];
+                    rdE_out     <= `writeDisable;
+                    rdIdx_out   <= `regNOP;
+                    immData_out <= {{20{inst_in[31]}}, inst_in[7], inst_in[30:25], inst_in[11:8], 1'b0};
+                    case (funct3)
+                        3'b000: begin                                   // BEQ, B-type
+                            instIdx_out     <= `idBEQ;
+                            instType_out    <= `instValid;
+                        end
+                        3'b001: begin                                   // BNE, B-type
+                            instIdx_out     <= `idBNE;
+                            instType_out    <= `instValid;
+                        end
+                        3'b100: begin                                   // BLT, B-type
+                            instIdx_out     <= `idBLT;
+                            instType_out    <= `instValid;
+                        end
+                        3'b101: begin                                   // BGE, B-type
+                            instIdx_out     <= `idBGE;
+                            instType_out    <= `instValid;
+                        end
+                        3'b110: begin                                   // BLTU, B-type
+                            instIdx_out     <= `idBLTU;
+                            instType_out    <= `instValid;
+                        end
+                        3'b111: begin                                   // BGEU, B-type
+                            instIdx_out     <= `idBGEU;
+                            instType_out    <= `instValid;
+                        end
+                        default: begin
+                            instValid       <= `instValid;
+                            instIdx_out     <= `idNOP;
+                            instType_out    <= `typeNOP;
+                            rdE_out         <= `writeDisable;
+                            rdIdx_out       <= `regNOP;
+                            reg1E_out       <= `readDisable;
+                            reg2E_out       <= `readDisable;
+                            reg1Idx_out     <= `regNOP;
+                            reg2Idx_out     <= `regNOP;
+                            immData_out     <= `ZERO32;
+                        end
+                    endcase
                 end
                 `opRI: begin                                        // Reg-Imm
                     instValid   <= `instValid;
@@ -97,52 +172,52 @@ module ID(
                     case (funct3)
                         3'b000: begin                                   // ADDI, I-type
                             instIdx_out     <= `idADD;
-                            instType_out    <= `typeArith;
-                            imm             <= {{20{inst_in[31]}}, inst_in[31:20]};
+                            instType_out    <= `typeValid;
+                            immData_out     <= {{20{inst_in[31]}}, inst_in[31:20]};
                         end
                         3'b010: begin                                   // SLTI, I-type
                             instIdx_out     <= `idSLT;
-                            instType_out    <= `typeOther;
-                            imm             <= {{20{inst_in[31]}}, inst_in[31:20]};
+                            instType_out    <= `typeValid;
+                            immData_out     <= {{20{inst_in[31]}}, inst_in[31:20]};
                         end
                         3'b011: begin                                   // SLTIU, I_type
                             instIdx_out     <= `idSLTU;
-                            instType_out    <= `typeOther;
-                            imm             <= {{20{inst_in[31]}}, inst_in[31:20]};
+                            instType_out    <= `typeValid;
+                            immData_out     <= {{20{inst_in[31]}}, inst_in[31:20]};
                         end
                         3'b100: begin                                   // XORI, I-type
                             instIdx_out     <= `idXOR;
-                            instType_out    <= `typeLogic;
-                            imm             <= {{20{inst_in[31]}}, inst_in[31:20]};
+                            instType_out    <= `typeValid;
+                            immData_out     <= {{20{inst_in[31]}}, inst_in[31:20]};
                         end
                         3'b110: begin                                   // ORI, I-type
                             instIdx_out     <= `idOR;
-                            instType_out    <= `typeLogic;
-                            imm             <= {{20{inst_in[31]}}, inst_in[31:20]};
+                            instType_out    <= `typeValid;
+                            immData_out     <= {{20{inst_in[31]}}, inst_in[31:20]};
                         end
                         3'b111: begin                                   // ANDI, I-type
                             instIdx_out     <= `idAND;
-                            instType_out    <= `typeLogic;
-                            imm             <= {{20{inst_in[31]}}, inst_in[31:20]};
+                            instType_out    <= `typeValid;
+                            immData_out     <= {{20{inst_in[31]}}, inst_in[31:20]};
                         end
                         3'b001: begin                                   // SLLI, I-type
                             instIdx_out     <= `idSLL;
-                            instType_out    <= `typeShift;
-                            imm             <= inst_in[24:20];
+                            instType_out    <= `typeValid;
+                            immData_out     <= inst_in[24:20];
                         end
                         3'b101: begin
                             if (funct7[5] == 1'b0) begin                // SRLI, I-type
                                 instIdx_out <= `idSRL;
-                                instType_out<= `typeShift;
-                                imm         <= inst_in[24:20];
+                                instType_out<= `typeValid;
+                                immData_out <= inst_in[24:20];
                             end else if (funct7[5] == 1'b1) begin       // SRAI, I-type
                                 instIdx_out <= `idSRA;
-                                instType_out<= `typeShift;
-                                imm         <= inst_in[24:20];
+                                instType_out<= `typeValid;
+                                immData_out <= inst_in[24:20];
                             end else begin
                                 instIdx_out <= `idNOP;
                                 instType_out<= `typeNOP;
-                                imm         <= `ZERO32;
+                                immData_out <= `ZERO32;
                             end
                         end
                         default : begin
@@ -155,7 +230,7 @@ module ID(
                             rdIdx_out       <= `regNOP;
                             reg1Idx_out     <= `regNOP;
                             reg2Idx_out     <= `regNOP;
-                            imm             <= `ZERO32;
+                            immData_out     <= `ZERO32;
                         end
                     endcase
                 end
@@ -167,16 +242,16 @@ module ID(
                     rdIdx_out   <= inst_in[11:7];
                     reg1Idx_out <= inst_in[19:15];
                     reg2Idx_out <= inst_in[24:20];
-                    imm         <= `ZERO32;
+                    immData_out <= `ZERO32;
 
                     case (funct3)
                         3'b000: begin
                             if (funct7[5] == 1'b0) begin                // ADD, R-type
                                 instIdx_out <= `idADD;
-                                instType_out<= `typeArith;
+                                instType_out<= `typeValid;
                             end else if (funct7[5] == 1'b1) begin       // SUB, R-type
                                 instIdx_out <= `idSUB;
-                                instType_out<= `typeArith;
+                                instType_out<= `typeValid;
                             end else begin
                                 instIdx_out <= `idNOP;
                                 instType_out<= `typeNOP;
@@ -184,35 +259,35 @@ module ID(
                         end
                         3'b010: begin                                   // SLT, R-type
                             instIdx_out     <= `idSLT;
-                            instType_out    <= `typeOther;
+                            instType_out    <= `typeValid;
                         end
                         3'b011: begin                                   // SLTU, R-type
                             instIdx_out     <= `idSLTU;
-                            instType_out    <= `typeOther;
+                            instType_out    <= `typeValid;
                         end
                         3'b100: begin                                   // XOR, R-type
                             instIdx_out     <= `idXOR;
-                            instType_out    <= `typeLogic;
+                            instType_out    <= `typeValid;
                         end
                         3'b110: begin                                   // OR, R-type
                             instIdx_out     <= `idOR;
-                            instType_out    <= `typeLogic;
+                            instType_out    <= `typeValid;
                         end
                         3'b111: begin                                   // AND, R-type
                             instIdx_out     <= `idAND;
-                            instType_out    <= `typeLogic;
+                            instType_out    <= `typeValid;
                         end
                         3'b001: begin                                   // SLL, R-type
                             instIdx_out     <= `idSLL;
-                            instType_out    <= `typeShift;
+                            instType_out    <= `typeValid;
                         end
                         3'b101: begin
                             if (funct7[5] == 1'b0) begin                // SRL, R-type
                                 instIdx_out <= `idSRL;
-                                instType_out<= `typeShift;
+                                instType_out<= `typeValid;
                             end else if (funct7[5] == 1'b1) begin       // SRA, R-type
                                 instIdx_out <= `idSRA;
-                                instType_out<= `typeShift;
+                                instType_out<= `typeValid;
                             end else begin
                                 instIdx_out <= `idNOP;
                                 instType_out<= `typeNOP;
@@ -231,7 +306,7 @@ module ID(
                     reg2E_out       <= `readDisable;
                     reg1Idx_out     <= `regNOP;
                     reg2Idx_out     <= `regNOP;
-                    imm             <= `ZERO32;
+                    immData_out     <= `ZERO32;
                 end
             endcase
         end
@@ -241,8 +316,6 @@ module ID(
     always @ (*) begin
         if (rst_in == `rstEnable) begin
             rs1Data_out <= `ZERO32;
-        end else if (opcode == `opAUIPC) begin
-            rs1Data_out <= pc_in;
         end else if (reg1E_out == `readEnable && EX_rdE_in == `writeEnable &&
             EX_rdIdx_in == reg1Idx_out) begin
             rs1Data_out <= EX_rdData_in;
@@ -251,8 +324,6 @@ module ID(
             rs1Data_out <= MEM0_rdData_in;
         end else if (reg1E_out == `readEnable) begin
             rs1Data_out <= reg1Data_in;
-        end else if (reg1E_out == `readDisable) begin
-            rs1Data_out <= imm;
         end else begin
             rs1Data_out <= `ZERO32;
         end
@@ -261,10 +332,6 @@ module ID(
     always @ (*) begin
         if (rst_in == `rstEnable) begin
             rs2Data_out <= `ZERO32;
-        end else if (opcode == `opAUIPC) begin
-            rs2Data_out <= imm;
-        end else if (opcode == `opRR && (funct3 == 3'b001 || funct3 == 3'b101)) begin // for shamt
-            rs2Data_out <= reg2Data_in[4:0];
         end else if (reg2E_out == `readEnable && EX_rdE_in == `writeEnable &&
             EX_rdIdx_in == reg2Idx_out) begin
             rs2Data_out <= EX_rdData_in;
@@ -273,11 +340,16 @@ module ID(
             rs2Data_out <= MEM0_rdData_in;
         end else if (reg2E_out == `readEnable) begin
             rs2Data_out <= reg2Data_in;
-        end else if (reg2E_out == `readDisable) begin
-            rs2Data_out <= imm;
         end else begin
             rs2Data_out <= `ZERO32;
         end
     end
 
+    always @ (*) begin
+        if (rst_in == `rstEnable) begin
+            pc_out <= `ZERO32;
+        end else begin
+            pc_out <= pc_in;
+        end
+    end
 endmodule : ID

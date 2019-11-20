@@ -36,16 +36,16 @@
 
 ### Control Transfer Instructions
 1. **Unconditional Jumps**  
-    [0] JAL  
-  	[0] JALR  
+    [1] JAL  
+  	[1] JALR  
 
 2. **Conditional Branches**  
-	[0] BEQ  
-	[0] BNE  
-	[0] BLT  
-	[0] BGE  
-	[0] BLTU  
-	[0] BGEU  
+	[1] BEQ  
+	[1] BNE  
+	[1] BLT  
+	[1] BGE  
+	[1] BLTU  
+	[1] BGEU  
 
 ### Load & Store Instructions
 1. **Load**  

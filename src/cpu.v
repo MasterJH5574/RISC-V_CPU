@@ -40,11 +40,17 @@ module cpu(
         .stall_out(stall_out)
     );
 
+    // link EX to PC, IF_ID and ID_EX for Jump and Branch
+    wire                pcJump;
+    wire[`addrRange]    pcTarget;
+
     PC PC0(
         .clk_in(clk_in),
         .rst_in(rst_in),
         .rdy_in(rdy_in), // Todo
         .stall_in(stall_out),
+        .pcJump_in(pcJump),
+        .pcTarget_in(pcTarget),
         .pc_out(PC_pc_out)
     );
 
@@ -74,6 +80,7 @@ module cpu(
         .clk_in(clk_in),
         .rst_in(rst_in),
         .stall_in(stall_out),
+        .pcJump_in(pcJump),
         .pc_in(pc),
         .inst_in(mem_din),
         .pc_out(IF_ID_pc_out),
@@ -91,12 +98,14 @@ module cpu(
     wire[`dataRange]    RegFile_reg2Data_out;
 
     // link ID to ID_EX
+    wire[`addrRange]        ID_pc_out;
     wire                    ID_rdE_out;
     wire[`regIdxRange]      ID_rdIdx_out;
     wire[`instIdxRange]     ID_instIdx_out;
     wire[`instTypeRange]    ID_instType_out;
     wire[`dataRange]        ID_rs1Data_out;
     wire[`dataRange]        ID_rs2Data_out;
+    wire[`dataRange]        ID_immData_out;
 
     // link EX to EX_MEM, also forwarding to ID
     wire                    EX_rdE_out;
@@ -126,49 +135,60 @@ module cpu(
         .reg2E_out(ID_reg2E_out),
         .reg1Idx_out(ID_reg1Idx_out),
         .reg2Idx_out(ID_reg2Idx_out),
+        .pc_out(ID_pc_out),
         .rdE_out(ID_rdE_out),
         .rdIdx_out(ID_rdIdx_out),
         .instIdx_out(ID_instIdx_out),
         .instType_out(ID_instType_out),
         .rs1Data_out(ID_rs1Data_out),
         .rs2Data_out(ID_rs2Data_out),
+        .immData_out(ID_immData_out),
         .idStall_out(idStall)
     );
 
     // link ID_EX to EX
+    wire[`addrRange]        ID_EX_pc_out;
     wire                    ID_EX_rdE_out;
     wire[`regIdxRange]      ID_EX_rdIdx_out;
     wire[`instIdxRange]     ID_EX_instIdx_out;
     wire[`instTypeRange]    ID_EX_instType_out;
     wire[`dataRange]        ID_EX_rs1Data_out;
     wire[`dataRange]        ID_EX_rs2Data_out;
+    wire[`dataRange]        ID_EX_immData_out;
 
     ID_EX ID_EX0(
         .clk_in(clk_in),
         .rst_in(rst_in),
         .stall_in(stall_out),
+        .pcJump_in(pcJump),
+        .pc_in(ID_pc_out),
         .rdE_in(ID_rdE_out),
         .rdIdx_out(ID_rdIdx_out),
         .instIdx_in(ID_instIdx_out),
         .instType_in(ID_instType_out),
         .rs1Data_in(ID_rs1Data_out),
         .rs2Data_in(ID_rs2Data_out),
+        .immData_out(ID_immData_out),
+        .pc_out(ID_EX_pc_out),
         .rdE_out(ID_EX_rdE_out),
         .rdIdx_out(ID_EX_rdIdx_out),
         .instIdx_out(ID_EX_instIdx_out),
         .instType_out(ID_EX_instType_out),
         .rs1Data_out(ID_EX_rs1Data_out),
-        .rs2Data_out(ID_EX_rs2Data_out)
+        .rs2Data_out(ID_EX_rs2Data_out),
+        .immData_out(ID_EX_immData_out)
     );
 
     EX EX0(
         .rst_in(rst_in),
+        .pc_in(ID_EX_pc_out),
         .rdE_in(ID_EX_rdE_out),
         .rdIdx_in(ID_EX_rdIdx_out),
         .instIdx_in(ID_EX_instIdx_out),
         .instType_in(ID_EX_instType_out),
         .rs1Data_in(ID_EX_rs1Data_out),
         .rs2Data_in(ID_EX_rs2Data_out),
+        .immData_in(ID_EX_immData_out),
         .rdE_out(EX_rdE_out),
         .rdIdx_out(EX_rdIdx_out),
         .rdData_out(EX_rdData_out)
