@@ -162,6 +162,80 @@ module ID(
                         end
                     endcase
                 end
+                `opLoad: begin
+                    instValid   <= `instValid;
+                    rdE_out     <= `writeEnable;
+                    reg1E_out   <= `readEnable;
+                    reg2E_out   <= `readDisable;
+                    rdIdx_out   <= inst_in[11:7];
+                    reg1Idx_out <= inst_in[19:15];
+                    reg2Idx_out <= `regNOP;
+                    immData_out <= {{20{inst_in[31]}}, inst_in[31:20]};
+                    instType_out<= `instLoad;
+                    case (funct3)
+                        3'b000: begin                                   // LB, I-type
+                            instIdx_out     <= `idLB;
+                        end
+                        3'b001: begin                                   // LH, I-type
+                            instIdx_out     <= `idLH;
+                        end
+                        3'b010: begin                                   // LW, I-type
+                            instIdx_out     <= `idLW;
+                        end
+                        3'b100: begin                                   // LBU, I-type
+                            instIdx_out     <= `idLBU;
+                        end
+                        3'b101: begin                                   // LHU, I-type
+                            instIdx_out     <= `idLHU;
+                        end
+                        default: begin
+                            instIdx_out     <= `idNOP;
+                            instType_out    <= `typeNOP;
+                            instValid       <= `instInvalid;
+                            rdE_out         <= `writeDisable;
+                            reg1E_out       <= `readDisable;
+                            reg2E_out       <= `readDisable;
+                            rdIdx_out       <= `regNOP;
+                            reg1Idx_out     <= `regNOP;
+                            reg2Idx_out     <= `regNOP;
+                            immData_out     <= `ZERO32;
+                        end
+                    endcase
+                end
+                `opStore: begin
+                    instValid   <= `instValid;
+                    rdE_out     <= `writeDisable;
+                    reg1E_out   <= `readEnable;
+                    reg2E_out   <= `readEnable;
+                    rdIdx_out   <= `regNOP;
+                    reg1Idx_out <= inst_in[19:15];
+                    reg2Idx_out <= inst_in[24:20];
+                    immData_out <= {{20{inst_in[31]}}, inst_in[31:25], inst_in[11:7]};
+                    instType_out<= `instStore;
+                    case (funct3)
+                        3'b000: begin                                   // SB, S-type
+                            instIdx_out     <= `idSB;
+                        end
+                        3'b001: begin                                   // SH, S-type
+                            instIdx_out     <= `idSH;
+                        end
+                        3'b010: begin                                   // SW, S-type
+                            instIdx_out     <= `idSW;
+                        end
+                        default: begin
+                            instIdx_out     <= `idNOP;
+                            instType_out    <= `typeNOP;
+                            instValid       <= `instInvalid;
+                            rdE_out         <= `writeDisable;
+                            reg1E_out       <= `readDisable;
+                            reg2E_out       <= `readDisable;
+                            rdIdx_out       <= `regNOP;
+                            reg1Idx_out     <= `regNOP;
+                            reg2Idx_out     <= `regNOP;
+                            immData_out     <= `ZERO32;
+                        end
+                    endcase
+                end
                 `opRI: begin                                        // Reg-Imm
                     instValid   <= `instValid;
                     rdE_out     <= `writeEnable;

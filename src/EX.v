@@ -18,6 +18,9 @@ module EX(
 
     // output to EX_MEM
     output reg[`instIdxRange]   instIdx_out,           // also output to ID
+    output reg[`addrRange]      memAddr_out,
+    output reg[`dataRange]      valStore_out,
+
     output reg                  rdE_out,
     output reg[`regIdxRange]    rdIdx_out,
     output reg[`dataRange]      rdData_out,
@@ -175,8 +178,8 @@ module EX(
                     pcJump_out      <= `NoJump;
                     pcTarget_out    <= `ZERO32;
                 end
-                default : begin
-                    res             <= `ZERO32;
+                default : begin                             // include LB, LH, LW, LBU, LHU,
+                    res             <= `ZERO32;             // SB, SH, SW
                     pcJump_out      <= `NoJump;
                     pcTarget_out    <= `ZERO32;
                 end
@@ -188,11 +191,15 @@ module EX(
     always @ (*) begin
         if (rst_in == `rstEnable) begin
             instIdx_out <= `idNOP;
+            memAddr_out <= `ZERO32;
+            valStore_out<= `ZERO32;
             rdE_out     <= `writeDisable;
             rdIdx_out   <= `regNOP;
             rdData_out  <= `ZERO32;
         end else if (instType_in == `typeValid) begin
             instIdx_out <= instIdx_in;
+            memAddr_out <= rs1Data_in + immData_in;
+            valStore_out<= rs2Data_in;
             rdE_out     <= rdE_in;
             rdIdx_out   <= rdIdx_in;
             rdData_out  <= res;

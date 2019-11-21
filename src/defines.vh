@@ -77,8 +77,10 @@
 `define writeEnable     1'b1
 `define writeDisable    1'b0
 
-`define instValid       1'b0
-`define instInvalid     1'b1
+`define instValid       2'b01
+`define instInvalid     2'b00
+`define instLoad        2'b10
+`define instStore       2'b11
 
 //------------------ Hardware Properties ----------------
 
