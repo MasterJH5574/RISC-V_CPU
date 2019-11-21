@@ -4,6 +4,7 @@ module MEM(
     input wire                  rst_in,
 
     // input from EX_MEM
+    input wire[`instIdxRange]   instIdx_in,
     input wire                  rdE_in,
     input wire[`regIdxRange]    rdIdx_in,
     input wire[`dataRange]      rdData_in,

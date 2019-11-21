@@ -81,7 +81,7 @@ module cpu(
         .rst_in(rst_in),
         .stall_in(stall_out),
         .pcJump_in(pcJump),
-        .pc_in(pc),
+        .pc_in(PC_pc_out),
         .inst_in(mem_din),
         .pc_out(IF_ID_pc_out),
         .inst_out(IF_ID_inst_out)
@@ -108,6 +108,7 @@ module cpu(
     wire[`dataRange]        ID_immData_out;
 
     // link EX to EX_MEM, also forwarding to ID
+    wire[`instIdxRange]     EX_instIdx_out; // link EX to ID to handle data hazard caused by LOAD
     wire                    EX_rdE_out;
     wire[`regIdxRange]      EX_rdIdx_out;
     wire[`dataRange]        EX_rdData_out;
@@ -131,6 +132,7 @@ module cpu(
         .MEM0_rdIdx_in(MEM_rdIdx_out),
         .MEM0_rdData_in(MEM_rdData_out),
         // --- end forwarding input ---
+        .instIdxEx_in(EX_instIdx_out),
         .reg1E_out(ID_reg1E_out),
         .reg2E_out(ID_reg2E_out),
         .reg1Idx_out(ID_reg1Idx_out),
@@ -189,12 +191,14 @@ module cpu(
         .rs1Data_in(ID_EX_rs1Data_out),
         .rs2Data_in(ID_EX_rs2Data_out),
         .immData_in(ID_EX_immData_out),
+        .instIdx_out(EX_instIdx_out),
         .rdE_out(EX_rdE_out),
         .rdIdx_out(EX_rdIdx_out),
         .rdData_out(EX_rdData_out)
     );
 
     // link EX_MEM to MEM
+    wire[`instIdxRange]     EX_MEM_instIdx_out;
     wire                    EX_MEM_rdE_out;
     wire[`regIdxRange]      EX_MEM_rdIdx_out;
     wire[`dataRange]        EX_MEM_rdData_out;
@@ -203,9 +207,11 @@ module cpu(
         .clk_in(clk_in),
         .rst_in(rst_in),
         .stall_in(stall_out),
+        .instIdx_in(EX_instIdx_out),
         .rdE_in(EX_rdE_out),
         .rdIdx_in(EX_rdIdx_out),
         .rdData_in(EX_rdIdx_out),
+        .instIdx_out(EX_MEM_instIdx_out),
         .rdE_out(EX_MEM_rdE_out),
         .rdIdx_out(EX_MEM_rdIdx_out),
         .rdData_out(EX_MEM_rdData_out)
@@ -213,6 +219,7 @@ module cpu(
 
     MEM MEM0(
         .rst_in(rst_in),
+        .instIdx_in(EX_MEM_instIdx_out),
         .rdE_in(EX_MEM_rdE_out),
         .rdIdx_in(EX_MEM_rdIdx_out),
         .rdData_in(EX_MEM_rdData_out),

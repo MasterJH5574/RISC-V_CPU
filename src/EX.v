@@ -17,6 +17,7 @@ module EX(
     input wire[`dataRange]      immData_in,
 
     // output to EX_MEM
+    output reg[`instIdxRange]   instIdx_out,           // also output to ID
     output reg                  rdE_out,
     output reg[`regIdxRange]    rdIdx_out,
     output reg[`dataRange]      rdData_out,
@@ -186,10 +187,12 @@ module EX(
 
     always @ (*) begin
         if (rst_in == `rstEnable) begin
+            instIdx_out <= `idNOP;
             rdE_out     <= `writeDisable;
             rdIdx_out   <= `regNOP;
             rdData_out  <= `ZERO32;
         end else if (instType_in == `typeValid) begin
+            instIdx_out <= instIdx_in;
             rdE_out     <= rdE_in;
             rdIdx_out   <= rdIdx_in;
             rdData_out  <= res;

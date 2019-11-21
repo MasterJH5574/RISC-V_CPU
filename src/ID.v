@@ -18,6 +18,9 @@ module ID(
     input wire[`regIdxRange]    MEM0_rdIdx_in,
     input wire[`dataRange]      MEM0_rdData_in,
 
+    // input instruction ID from EX for data hazard caused by LOAD
+    input wire[`instIdxRange]   instIdxEx_in,
+
     // output to RegFile
     output reg                  reg1E_out,
     output reg                  reg2E_out,
@@ -38,7 +41,7 @@ module ID(
     output reg[`dataRange]      immData_out,
 
     // stall request
-    output reg                  idStall_out
+    output wire                 idStall_out
 );
 
     wire[6:0] opcode = inst_in[6:0];
@@ -48,7 +51,6 @@ module ID(
     reg instValid;              // Todo: usage of instValid?
 
     // ---------------- DECODE -------------------
-    // Todo: Remember to decode the IMMEDIATE
     always @ (*) begin
         if (rst_in == `rstEnable) begin
             instValid       <= `instValid;
@@ -312,10 +314,22 @@ module ID(
         end
     end
 
+    // handle data hazard caused by LOAD
+    reg reg1Stall, reg2Stall;
+    wire Loading;
+
+    assign Loading = instIdxEx_in == `idLB || instIdxEx_in == `idLH || instIdxEx_in == `idLW ||
+        instIdxEx_in == `idLBU || instIdxEx_in == `idLHU || instIdxEx_in == `idSB ||
+        instIdxEx_in == `idSH || instIdxEx_in == `idSW;
+
     // ----------------- DECODE FINISH ----------------
     always @ (*) begin
+        reg1Stall <= `NoStall;
         if (rst_in == `rstEnable) begin
             rs1Data_out <= `ZERO32;
+        end else if (Loading == 1'b1 && reg1E_out == `readEnable
+            && EX_rdIdx_in && reg1Idx_out) begin
+            reg1Stall <= `Stall;
         end else if (reg1E_out == `readEnable && EX_rdE_in == `writeEnable &&
             EX_rdIdx_in == reg1Idx_out) begin
             rs1Data_out <= EX_rdData_in;
@@ -330,8 +344,12 @@ module ID(
     end
 
     always @ (*) begin
+        reg2Stall <= `NoStall;
         if (rst_in == `rstEnable) begin
             rs2Data_out <= `ZERO32;
+        end else if (Loading == 1'b1 && reg2E_out == `readEnable
+            && EX_rdIdx_in && reg2Idx_out) begin
+            reg2Stall <= `Stall;
         end else if (reg2E_out == `readEnable && EX_rdE_in == `writeEnable &&
             EX_rdIdx_in == reg2Idx_out) begin
             rs2Data_out <= EX_rdData_in;
@@ -352,4 +370,6 @@ module ID(
             pc_out <= pc_in;
         end
     end
+
+    assign idStall_out = reg1Stall | reg2Stall;
 endmodule : ID
