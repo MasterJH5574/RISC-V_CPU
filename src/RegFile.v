@@ -22,8 +22,6 @@ module RegFile(
 
     reg[`dataRange] regs[0:31];
 
-    // Todo: what is the condition of "always @ (*)"?
-
     // write first
     always @ (posedge clk_in) begin // Todo: to be checked.
         if (rst_in == `rstDisable) begin

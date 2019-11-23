@@ -39,9 +39,9 @@ module EX(
             pcJump_out      <= `NoJump;
             pcTarget_out    <= `ZERO32;
         end else begin
-            case (rdIdx_in)
+            case (instIdx_in)
                 `idLUI: begin                               // LUI
-                    res             <= rs1Data_in;
+                    res             <= immData_in;
                     pcJump_out      <= `NoJump;
                     pcTarget_out    <= `ZERO32;
                 end
@@ -120,7 +120,7 @@ module EX(
                         pcTarget_out<= `ZERO32;
                     end
                 end
-                `idSLT: begin                               // SLTI, SLT
+                `idSLT: begin                               // SLT
                     if ($signed(rs1Data_in) < $signed(rs2Data_in)) begin
                         res <= 1'b1;
                     end else begin
@@ -129,7 +129,16 @@ module EX(
                     pcJump_out      <= `NoJump;
                     pcTarget_out    <= `ZERO32;
                 end
-                `idSLTU: begin                              // SLTIU, SLTU
+                `idSLTI: begin                              // SLTI
+                    if ($signed(rs1Data_in) < $signed(immData_in)) begin
+                        res <= 1'b1;
+                    end else begin
+                        res <= 1'b0;
+                    end
+                    pcJump_out      <= `NoJump;
+                    pcTarget_out    <= `ZERO32;
+                end
+                `idSLTU: begin                              // SLTU
                     if (rs1Data_in < rs2Data_in) begin
                         res         <= 1'b1;
                     end else begin
@@ -138,23 +147,52 @@ module EX(
                     pcJump_out      <= `NoJump;
                     pcTarget_out    <= `ZERO32;
                 end
-                `idXOR: begin                               // XORI, XOR
+                `idSLTIU: begin                             // SLTIU
+                    if (rs1Data_in < immData_in) begin
+                        res         <= 1'b1;
+                    end else begin
+                        res         <= 1'b0;
+                    end
+                    pcJump_out      <= `NoJump;
+                    pcTarget_out    <= `ZERO32;
+                end
+                `idXOR: begin                               // XOR
                     res             <= rs1Data_in ^ rs2Data_in;
                     pcJump_out      <= `NoJump;
                     pcTarget_out    <= `ZERO32;
                 end
-                `idOR: begin                                // ORI, OR
+                `idXORI: begin                              // XORI
+                    res             <= rs1Data_in ^ immData_in;
+                    pcJump_out      <= `NoJump;
+                    pcTarget_out    <= `ZERO32;
+                end
+                `idOR: begin                                // OR
                     res             <= rs1Data_in | rs2Data_in;
                     pcJump_out      <= `NoJump;
                     pcTarget_out    <= `ZERO32;
                 end
-                `idAND: begin                               // ANDI, AND
+                `idORI: begin                               // ORI
+                    res             <= rs1Data_in | immData_in;
+                    pcJump_out      <= `NoJump;
+                    pcTarget_out    <= `ZERO32;
+                end
+                `idAND: begin                               // AND
                     res             <= rs1Data_in & rs2Data_in;
                     pcJump_out      <= `NoJump;
                     pcTarget_out    <= `ZERO32;
                 end
-                `idADD: begin                               // ADDI, ADD
+                `idANDI: begin                              // ANDI
+                    res             <= rs1Data_in & immData_in;
+                    pcJump_out      <= `NoJump;
+                    pcTarget_out    <= `ZERO32;
+                end
+                `idADD: begin                               // ADD
                     res             <= rs1Data_in + rs2Data_in;
+                    pcJump_out      <= `NoJump;
+                    pcTarget_out    <= `ZERO32;
+                end
+                `idADDI: begin                              // ADDI
+                    res             <= rs1Data_in + immData_in;
                     pcJump_out      <= `NoJump;
                     pcTarget_out    <= `ZERO32;
                 end
@@ -163,18 +201,33 @@ module EX(
                     pcJump_out      <= `NoJump;
                     pcTarget_out    <= `ZERO32;
                 end
-                `idSLL: begin                               // SLLI, SLL
+                `idSLL: begin                               // SLL
                     res             <= rs1Data_in << rs2Data_in[4:0];
                     pcJump_out      <= `NoJump;
                     pcTarget_out    <= `ZERO32;
                 end
-                `idSRL: begin                               // SRLI, SRL
+                `idSLLI: begin                              // SLLI
+                    res             <= rs1Data_in << immData_in[4:0];
+                    pcJump_out      <= `NoJump;
+                    pcTarget_out    <= `ZERO32;
+                end
+                `idSRL: begin                               // SRL
                     res             <= rs1Data_in >> rs2Data_in[4:0];
                     pcJump_out      <= `NoJump;
                     pcTarget_out    <= `ZERO32;
                 end
-                `idSRA: begin                               // SRAI, SRA
+                `idSRLI: begin
+                    res             <= rs1Data_in >> immData_in[4:0];
+                    pcJump_out      <= `NoJump;
+                    pcTarget_out    <= `ZERO32;
+                end
+                `idSRA: begin                               // SRA
                     res             <= rs1Data_in >>> rs2Data_in[4:0];
+                    pcJump_out      <= `NoJump;
+                    pcTarget_out    <= `ZERO32;
+                end
+                `idSRAI: begin
+                    res             <= rs1Data_in >>> immData_in[4:0];
                     pcJump_out      <= `NoJump;
                     pcTarget_out    <= `ZERO32;
                 end

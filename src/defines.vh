@@ -1,6 +1,8 @@
 `ifndef DEFINES_VH
 `define DEFINES_VH
 
+`define ZERO8           8'h00
+`define ZERO17          17'b00000000000000000
 `define ZERO32          32'h00000000
 `define PCSTEP          4'h4
 
@@ -46,6 +48,15 @@
 `define idSB            6'b010000
 `define idSH            6'b010001
 `define idSW            6'b010010
+`define idADDI          6'b010011
+`define idSLTI          6'b010100
+`define idSLTIU         6'b010101
+`define idXORI          6'b010110
+`define idORI           6'b010111
+`define idANDI          6'b011000
+`define idSLLI          6'b011001
+`define idSRLI          6'b011010
+`define idSRAI          6'b011011
 `define idADD           6'b011100
 `define idSUB           6'b011101
 `define idSLL           6'b011110
@@ -68,6 +79,8 @@
 
 // ----------------- Enable & Disable ------------------
 
+`define Enable          1'b1
+`define Disable         1'b0
 `define rstEnable       1'b1
 `define rstDisable      1'b0
 `define chipEnable      1'b1
@@ -84,8 +97,10 @@
 
 //------------------ Hardware Properties ----------------
 
-`define addrBusWidth    8
-`define addrBusRange    7:0
+`define dataBusWidth    8
+`define dataBusRange    7:0
+`define addrBusWidth    17
+`define addrBusRange    16:0
 
 `define addrWidth       32
 `define addrRange       31:0
@@ -118,5 +133,10 @@
 `define Jump            1'b1
 `define NoJump          1'b0
 
+//------------ MEMORY CONTROLLER -------------
+`define READ            1'b0
+`define WRITE           1'b1
+`define Busy            1'b1
+`define NotBusy         1'b0
 
 `endif

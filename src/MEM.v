@@ -12,6 +12,21 @@ module MEM(
     input wire[`regIdxRange]    rdIdx_in,
     input wire[`dataRange]      rdData_in,
 
+    // input from Memory Controller
+    input wire                  MC_busy_in,
+    input wire                  MC_dataE_in,
+    input wire[`dataRange]      MC_data_in,
+
+    // output to Memory Controller
+    output reg                  MCE_out,
+    output reg                  MCrw_out,
+    output reg[`addrRange]      MCAddr_out,
+    output reg[`dataRange]      MCData_out,
+    output reg[2:0]             MCLen_out,
+
+    // output to IF, MEM is accessing MC
+    output reg                  MEM_MCAccess_out,
+
     // output to MEM_WB
     output reg                  rdE_out,
     output reg[`regIdxRange]    rdIdx_out,
@@ -23,11 +38,23 @@ module MEM(
 
     always @ (*) begin
         if (rst_in == `rstEnable) begin
+            MCE_out     <= `Disable;
+            MCrw_out    <= `READ;
+            MCAddr_out  <= `ZERO32;
+            MCData_out  <= `ZERO32;
+            MCLen_out   <= 0;
+            MEM_MCAccess_out <= `Disable;
             rdE_out     <= `writeDisable;
             rdIdx_out   <= `regNOP;
             rdData_out  <= `ZERO32;
             memStall_out <= `NoStall;
         end else begin
+            MCE_out     <= `Disable;
+            MCrw_out    <= `READ;
+            MCAddr_out  <= `ZERO32;
+            MCData_out  <= `ZERO32;
+            MCLen_out   <= 0;
+            MEM_MCAccess_out <= `Disable;
             rdE_out     <= rdE_in;
             rdIdx_out   <= rdIdx_in;
             rdData_out  <= rdData_in;

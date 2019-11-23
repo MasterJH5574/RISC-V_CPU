@@ -31,7 +31,7 @@ module cpu(
 
     // stall controller
     wire ifStall, idStall, memStall; // send request
-    wire stall_out;
+    wire[`stallRange] stall_out;
     stallCtrl stallCtrl0(
         .rst_in(rst_in),
         .ifStall_in(ifStall),
@@ -54,19 +54,33 @@ module cpu(
         .pc_out(PC_pc_out)
     );
 
-    // count clock for IF
-    wire[`stallCntRange] IF_cnt_in;
-    wire[`stallCntRange] IF_cnt_out;
 
     // link IF to IF_ID
     wire[`addrRange] IF_pc_out;
     wire[`instRange] IF_inst_out;
 
+    // Memory Controller busy signal
+    wire MC_busy;
+
+    // MEM accessing MC
+    wire MEM_MCAccess_out;
+
+    // link IF and Memory Controller
+    wire                MC_instE_out;
+    wire[`instRange]    MC_inst_out;
+    wire                IF_MCE_out;
+    wire[`addrRange]    IF_MCAddr_out;
+
     IF IF0(
         .rst_in(rst_in),
         .pc_in(PC_pc_out),
-        .cnt_in(IF_cnt_in),
-        .cnt_out(IF_cnt_out),
+        .pcJump_in(pcJump),
+        .MEM_MCAccess_in(MEM_MCAccess_out),
+        .MC_busy_in(MC_busy),
+        .instE_in(MC_instE_out),
+        .inst_in(MC_inst_out),
+        .MCE_out(IF_MCE_out),
+        .MCAddr_out(IF_MCAddr_out),
         .pc_out(IF_pc_out),
         .inst_out(IF_inst_out),
         .ifStall_out(ifStall)
@@ -81,8 +95,8 @@ module cpu(
         .rst_in(rst_in),
         .stall_in(stall_out),
         .pcJump_in(pcJump),
-        .pc_in(PC_pc_out),
-        .inst_in(mem_din),
+        .pc_in(IF_pc_out),
+        .inst_in(IF_inst_out),
         .pc_out(IF_ID_pc_out),
         .inst_out(IF_ID_inst_out)
     );
@@ -167,12 +181,12 @@ module cpu(
         .pcJump_in(pcJump),
         .pc_in(ID_pc_out),
         .rdE_in(ID_rdE_out),
-        .rdIdx_out(ID_rdIdx_out),
+        .rdIdx_in(ID_rdIdx_out),
         .instIdx_in(ID_instIdx_out),
         .instType_in(ID_instType_out),
         .rs1Data_in(ID_rs1Data_out),
         .rs2Data_in(ID_rs2Data_out),
-        .immData_out(ID_immData_out),
+        .immData_in(ID_immData_out),
         .pc_out(ID_EX_pc_out),
         .rdE_out(ID_EX_rdE_out),
         .rdIdx_out(ID_EX_rdIdx_out),
@@ -198,7 +212,9 @@ module cpu(
         .valStore_out(EX_valStore_out),
         .rdE_out(EX_rdE_out),
         .rdIdx_out(EX_rdIdx_out),
-        .rdData_out(EX_rdData_out)
+        .rdData_out(EX_rdData_out),
+        .pcJump_out(pcJump),
+        .pcTarget_out(pcTarget)
     );
 
     // link EX_MEM to MEM
@@ -215,10 +231,10 @@ module cpu(
         .stall_in(stall_out),
         .instIdx_in(EX_instIdx_out),
         .memAddr_in(EX_memAddr_out),
-        .valStore_out(EX_valStore_out),
+        .valStore_in(EX_valStore_out),
         .rdE_in(EX_rdE_out),
         .rdIdx_in(EX_rdIdx_out),
-        .rdData_in(EX_rdIdx_out),
+        .rdData_in(EX_rdData_out),
         .instIdx_out(EX_MEM_instIdx_out),
         .memAddr_out(EX_MEM_memAddr_out),
         .valStore_out(EX_MEM_valStore_out),
@@ -226,6 +242,15 @@ module cpu(
         .rdIdx_out(EX_MEM_rdIdx_out),
         .rdData_out(EX_MEM_rdData_out)
     );
+
+    // link MEM to Memory Controller
+    wire                MEM_MCE_out;
+    wire                MEM_MCrw_out;
+    wire[`addrRange]    MEM_MCAddr_out;
+    wire[`dataRange]    MEM_MCData_out;
+    wire[2:0]           MEM_MCLen_out;
+    wire                MC_DataE_out;
+    wire[`instRange]    MC_Data_out;
 
     MEM MEM0(
         .rst_in(rst_in),
@@ -235,6 +260,15 @@ module cpu(
         .rdE_in(EX_MEM_rdE_out),
         .rdIdx_in(EX_MEM_rdIdx_out),
         .rdData_in(EX_MEM_rdData_out),
+        .MC_busy_in(MC_busy),
+        .MC_dataE_in(MC_DataE_out),
+        .MC_data_in(MC_Data_out),
+        .MCE_out(MEM_MCE_out),
+        .MCrw_out(MEM_MCrw_out),
+        .MCAddr_out(MEM_MCAddr_out),
+        .MCData_out(MEM_MCData_out),
+        .MCLen_out(MEM_MCLen_out),
+        .MEM_MCAccess_out(MEM_MCAccess_out),
         .rdE_out(MEM_rdE_out),
         .rdIdx_out(MEM_rdIdx_out),
         .rdData_out(MEM_rdData_out),
@@ -270,5 +304,26 @@ module cpu(
         .reg2Idx_in(ID_reg2Idx_out),
         .reg1Data_out(RegFile_reg1Data_out),
         .reg2Data_out(RegFile_reg2Data_out)
+    );
+
+    memCtrl memCtrl0(
+        .clk_in(clk_in),
+        .rst_in(rst_in),
+        .IF_in(IF_MCE_out),
+        .IFAddr_in(IF_MCAddr_out),
+        .MEM_in(MEM_MCE_out),
+        .MEMrw_in(MEM_MCrw_out),
+        .MEMAddr_in(MEM_MCAddr_out),
+        .MEMData_in(MEM_MCData_out),
+        .MEMLen_in(MEM_MCLen_out),
+        .ramData_in(mem_din),
+        .ramRW_out(mem_wr),
+        .ramAddr_out(mem_a),
+        .ramData_out(mem_dout),
+        .busy_out(MC_busy),
+        .IFinstE_out(MC_instE_out),
+        .IFinst_out(MC_inst_out),
+        .MEMdataE_out(MC_DataE_out),
+        .MEMdata_out(MC_Data_out)
     );
 endmodule : cpu

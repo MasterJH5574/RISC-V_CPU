@@ -6,9 +6,20 @@ module IF(
     // input from PC
     input wire[`addrRange]      pc_in,
 
-    // clock count for IF
-    input wire[`stallCntRange]  cnt_in,
-    output reg[`stallCntRange]  cnt_out,
+    // input from EX for pc jump
+    input wire                  pcJump_in,
+
+    // input from MEM, MEM is accessing MC
+    input wire                  MEM_MCAccess_in,
+
+    // input from Memory Controller
+    input wire                  MC_busy_in,
+    input wire                  instE_in,
+    input wire[`instRange]      inst_in,
+
+    // output to Memory Controller
+    output reg                  MCE_out,
+    output reg[`addrRange]      MCAddr_out,
 
     // output to IF_ID
     output reg[`addrRange]      pc_out,
@@ -20,15 +31,35 @@ module IF(
 
     always @ (*) begin
         if (rst_in == `rstEnable) begin
+            MCE_out     <= `Disable;
+            MCAddr_out  <= `ZERO32;
             pc_out      <= `ZERO32;
             inst_out    <= `ZERO32;
-            cnt_out     <= 1'b0;
             ifStall_out <= `NoStall;
-        end else begin
+        end else if (pcJump_in == `Jump) begin
+            MCE_out     <= `Disable;
+            MCAddr_out  <= `ZERO32;
+            pc_out      <= `ZERO32;
+            inst_out    <= `ZERO32;
+            ifStall_out <= `NoStall;
+        end else if (instE_in == `writeEnable) begin
+            MCE_out     <= `Disable;
+            MCAddr_out  <= `ZERO32;
             pc_out      <= pc_in;
-            inst_out    <= `ZERO32; // Todo: modify after memory control
-            cnt_out     <= 1'b0;    // Todo: modify after memory control
+            inst_out    <= inst_in;
             ifStall_out <= `NoStall;
+        end else if (MEM_MCAccess_in == `Enable) begin
+            MCE_out     <= `Disable;
+            MCAddr_out  <= `ZERO32;
+            pc_out      <= `ZERO32;
+            inst_out    <= `ZERO32;
+            ifStall_out <= `Stall;
+        end else begin
+            MCE_out     <= `Enable;
+            MCAddr_out  <= pc_in;
+            pc_out      <= `ZERO32;
+            inst_out    <= `ZERO32;
+            ifStall_out <= `Stall;
         end
     end
 endmodule : IF

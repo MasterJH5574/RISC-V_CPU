@@ -247,47 +247,47 @@ module ID(
 
                     case (funct3)
                         3'b000: begin                                   // ADDI, I-type
-                            instIdx_out     <= `idADD;
+                            instIdx_out     <= `idADDI;
                             instType_out    <= `typeValid;
                             immData_out     <= {{20{inst_in[31]}}, inst_in[31:20]};
                         end
                         3'b010: begin                                   // SLTI, I-type
-                            instIdx_out     <= `idSLT;
+                            instIdx_out     <= `idSLTI;
                             instType_out    <= `typeValid;
                             immData_out     <= {{20{inst_in[31]}}, inst_in[31:20]};
                         end
                         3'b011: begin                                   // SLTIU, I_type
-                            instIdx_out     <= `idSLTU;
+                            instIdx_out     <= `idSLTIU;
                             instType_out    <= `typeValid;
                             immData_out     <= {{20{inst_in[31]}}, inst_in[31:20]};
                         end
                         3'b100: begin                                   // XORI, I-type
-                            instIdx_out     <= `idXOR;
+                            instIdx_out     <= `idXORI;
                             instType_out    <= `typeValid;
                             immData_out     <= {{20{inst_in[31]}}, inst_in[31:20]};
                         end
                         3'b110: begin                                   // ORI, I-type
-                            instIdx_out     <= `idOR;
+                            instIdx_out     <= `idORI;
                             instType_out    <= `typeValid;
                             immData_out     <= {{20{inst_in[31]}}, inst_in[31:20]};
                         end
                         3'b111: begin                                   // ANDI, I-type
-                            instIdx_out     <= `idAND;
+                            instIdx_out     <= `idANDI;
                             instType_out    <= `typeValid;
                             immData_out     <= {{20{inst_in[31]}}, inst_in[31:20]};
                         end
                         3'b001: begin                                   // SLLI, I-type
-                            instIdx_out     <= `idSLL;
+                            instIdx_out     <= `idSLLI;
                             instType_out    <= `typeValid;
                             immData_out     <= inst_in[24:20];
                         end
                         3'b101: begin
                             if (funct7[5] == 1'b0) begin                // SRLI, I-type
-                                instIdx_out <= `idSRL;
+                                instIdx_out <= `idSRLI;
                                 instType_out<= `typeValid;
                                 immData_out <= inst_in[24:20];
                             end else if (funct7[5] == 1'b1) begin       // SRAI, I-type
-                                instIdx_out <= `idSRA;
+                                instIdx_out <= `idSRAI;
                                 instType_out<= `typeValid;
                                 immData_out <= inst_in[24:20];
                             end else begin

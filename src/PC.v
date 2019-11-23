@@ -16,28 +16,30 @@ module PC (
     output reg[`addrRange]      pc_out
 );
 
-    reg ce;
-    always @ (posedge clk_in) begin
+    reg pcJump;
+    reg[`addrRange] pcTarget;
+
+    always @ (*) begin
         if (rst_in == `rstEnable) begin
-            ce <= `chipDisable;
-        end else begin
-            ce <= `chipEnable;
+            pcJump      <= `NoJump;
+            pcTarget    <= `ZERO32;
+        end else if (pcJump_in == `Jump) begin
+            pcJump      <= `Jump;
+            pcTarget    <= pcTarget_in;
         end
     end
 
     always @ (posedge clk_in) begin
-        if (ce == `chipDisable) begin
+        if (rst_in == `rstEnable) begin
             pc_out <= `ZERO32;
         end else if (stall_in[0] == `NoStall) begin // Todo: Modify
-            if (pcJump_in == `Jump) begin
-                pc_out <= pcTarget_in;
-            end else if (pcJump_in == `NoJump) begin
-                pc_out <= pc_out + `PCSTEP;
+            if (pcJump == `Jump) begin
+                pc_out <= pcTarget;
             end else begin
-                pc_out <= `ZERO32;
+                pc_out <= pc_out + `PCSTEP;
             end
-        end else begin
-            // do nothing
+            pcJump      <= `NoJump;
+            pcTarget    <= `ZERO32;
         end
     end
 
