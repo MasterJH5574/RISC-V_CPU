@@ -56,11 +56,13 @@ module cpu(
 
 
     // link IF to IF_ID
+    wire  IF_instE_out;
     wire[`addrRange] IF_pc_out;
     wire[`instRange] IF_inst_out;
 
     // Memory Controller busy signal
-    wire MC_busy;
+    wire MC_busyIF;
+    wire MC_busyMEM;
 
     // MEM accessing MC
     wire MEM_MCAccess_out;
@@ -76,11 +78,13 @@ module cpu(
         .pc_in(PC_pc_out),
         .pcJump_in(pcJump),
         .MEM_MCAccess_in(MEM_MCAccess_out),
-        .MC_busy_in(MC_busy),
+        .MC_busyIF_in(MC_busyIF),
+        .MC_busyMEM_in(MC_busyMEM),
         .instE_in(MC_instE_out),
         .inst_in(MC_inst_out),
         .MCE_out(IF_MCE_out),
         .MCAddr_out(IF_MCAddr_out),
+        .instE_out(IF_instE_out),
         .pc_out(IF_pc_out),
         .inst_out(IF_inst_out),
         .ifStall_out(ifStall)
@@ -95,6 +99,7 @@ module cpu(
         .rst_in(rst_in),
         .stall_in(stall_out),
         .pcJump_in(pcJump),
+        .instE_in(IF_instE_out),
         .pc_in(IF_pc_out),
         .inst_in(IF_inst_out),
         .pc_out(IF_ID_pc_out),
@@ -260,7 +265,8 @@ module cpu(
         .rdE_in(EX_MEM_rdE_out),
         .rdIdx_in(EX_MEM_rdIdx_out),
         .rdData_in(EX_MEM_rdData_out),
-        .MC_busy_in(MC_busy),
+        .MC_busyIF_in(MC_busyIF),
+        .MC_busyMEM_in(MC_busyMEM),
         .MC_dataE_in(MC_DataE_out),
         .MC_data_in(MC_Data_out),
         .MCE_out(MEM_MCE_out),
@@ -320,7 +326,8 @@ module cpu(
         .ramRW_out(mem_wr),
         .ramAddr_out(mem_a),
         .ramData_out(mem_dout),
-        .busy_out(MC_busy),
+        .busyIF_out(MC_busyIF),
+        .busyMEM_out(MC_busyMEM),
         .IFinstE_out(MC_instE_out),
         .IFinst_out(MC_inst_out),
         .MEMdataE_out(MC_DataE_out),

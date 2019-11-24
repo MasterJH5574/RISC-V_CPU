@@ -171,7 +171,7 @@ module ID(
                     reg1Idx_out <= inst_in[19:15];
                     reg2Idx_out <= `regNOP;
                     immData_out <= {{20{inst_in[31]}}, inst_in[31:20]};
-                    instType_out<= `instLoad;
+                    instType_out<= `typeValid;
                     case (funct3)
                         3'b000: begin                                   // LB, I-type
                             instIdx_out     <= `idLB;
@@ -211,7 +211,7 @@ module ID(
                     reg1Idx_out <= inst_in[19:15];
                     reg2Idx_out <= inst_in[24:20];
                     immData_out <= {{20{inst_in[31]}}, inst_in[31:25], inst_in[11:7]};
-                    instType_out<= `instStore;
+                    instType_out<= `typeValid;
                     case (funct3)
                         3'b000: begin                                   // SB, S-type
                             instIdx_out     <= `idSB;

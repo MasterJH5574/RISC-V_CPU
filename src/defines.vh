@@ -97,11 +97,6 @@
 
 //------------------ Hardware Properties ----------------
 
-`define dataBusWidth    8
-`define dataBusRange    7:0
-`define addrBusWidth    17
-`define addrBusRange    16:0
-
 `define addrWidth       32
 `define addrRange       31:0
 

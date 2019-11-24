@@ -256,6 +256,13 @@ module EX(
             rdE_out     <= rdE_in;
             rdIdx_out   <= rdIdx_in;
             rdData_out  <= res;
+        end else begin
+            instIdx_out <= `idNOP;
+            memAddr_out <= `ZERO32;
+            valStore_out<= `ZERO32;
+            rdE_out     <= `writeDisable;
+            rdIdx_out   <= `regNOP;
+            rdData_out  <= `ZERO32;
         end
     end
 
