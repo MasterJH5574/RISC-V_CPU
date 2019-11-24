@@ -20,10 +20,19 @@ module RegFile(
     output reg[`dataRange]      reg2Data_out
 );
 
+    integer i;
     reg[`dataRange] regs[0:31];
 
+    // initialize registers
+    always @ (posedge clk_in) begin
+        if (rst_in == `rstEnable) begin
+            for (i = 0; i < 32; i = i + 1)
+                regs[i] <= 0;
+        end
+    end
+
     // write first
-    always @ (posedge clk_in) begin // Todo: to be checked.
+    always @ (posedge clk_in) begin
         if (rst_in == `rstDisable) begin
             if (writeE_in == `writeEnable && writeIdx_in != 5'h0) begin
                 regs[writeIdx_in] <= writeData_in;

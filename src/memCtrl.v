@@ -39,6 +39,7 @@ module memCtrl (
     reg[2:0] cnt;
     wire[2:0] tot;
     wire[`addrRange] addr;
+    wire ramRW_fake;
 
     reg[7:0] loadData[3:0];
     wire[7:0] storeData[3:0];
@@ -49,7 +50,9 @@ module memCtrl (
 
     assign tot          = MEM_in == `Enable ? MEMLen_in : (IF_in == `Enable ? 4 : 0);
     assign addr         = MEM_in == `Enable ? MEMAddr_in[`addrRange] : IFAddr_in[`addrRange];
-    assign ramRW_out    = MEM_in == `Enable ? MEMrw_in : `READ;
+    assign ramRW_out    = MEM_in == `Enable ?
+                                    (cnt == tot ? `READ : MEMrw_in) : `READ;    // real RW signal
+    assign ramRW_fake   = MEM_in == `Enable ? MEMrw_in : `READ;                 // used for if
     assign ramAddr_out  = addr + cnt;
     assign ramData_out  = storeData[cnt];
 
@@ -66,7 +69,7 @@ module memCtrl (
             IFinst_out  <= `ZERO32;
             MEMdataE_out<= `writeDisable;
             MEMdata_out <= `ZERO32;
-        end else if (ramRW_out == `READ && tot != 0) begin
+        end else if (ramRW_fake == `READ && tot != 0) begin
             if (cnt == 0) begin
                 cnt         <= cnt + 1;
                 busyIF_out  <= IF_in == `Enable ? `Busy : `NotBusy;
@@ -98,7 +101,7 @@ module memCtrl (
                     IFinst_out  <= {ramData_in, loadData[2], loadData[1], loadData[0]};
                 end
             end
-        end else if (ramRW_out == `WRITE && tot != 0) begin
+        end else if (ramRW_fake == `WRITE && tot != 0) begin
             if (cnt == 0) begin
                 cnt         <= cnt + 1;
                 busyIF_out  <= `NotBusy;

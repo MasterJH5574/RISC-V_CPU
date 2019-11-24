@@ -91,12 +91,16 @@ module MEM(
                     MEM_MCAccess_out <= `Disable;
                     rdE_out     <= rdE_in;
                     rdIdx_out   <= rdIdx_in;
-                    if (instIdx_in == `idLB || instIdx_in == `idLH || instIdx_in == `idLW) begin
-                        rdData_out <= MC_data_in;
+                    if (instIdx_in == `idLB) begin
+                        rdData_out <= {{24{MC_data_in[7]}}, MC_data_in[7:0]};
                     end else if (instIdx_in == `idLBU) begin
-                        rdData_out <= {{24{MC_data_in[7]}}, MC_data_in};
+                        rdData_out <= MC_data_in[7:0];
+                    end else if (instIdx_in == `idLH) begin
+                        rdData_out <= {{16{MC_data_in[15]}}, MC_data_in[15:0]};
                     end else if (instIdx_in == `idLHU) begin
-                        rdData_out <= {{16{MC_data_in[15]}}, MC_data_in};
+                        rdData_out <= MC_data_in[15:0];
+                    end else if (instIdx_in == `idLW) begin
+                        rdData_out <= MC_data_in;
                     end
                     memStall_out<= `NoStall;
                 end else begin

@@ -112,7 +112,7 @@
 `define regNumber       32
 `define regNumberRange  0:31
 `define regIdxWidth     5
-`define regIdxRange     4:1
+`define regIdxRange     4:0
 
 `define regNOP          5'b00000
 

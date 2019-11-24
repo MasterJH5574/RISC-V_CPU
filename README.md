@@ -49,35 +49,38 @@
 
 ### Load & Store Instructions
 1. **Load**  
-	[0] LB  
-	[0] LH  
-	[0] LW  
-	[0] LBU  
-	[0] LHU  
+	[1] LB  
+	[1] LH  
+	[1] LW  
+	[1] LBU  
+	[1] LHU  
 	
 2. **Save**  
-	[0] SB  
-	[0] SH  
-	[0] SW  
+	[1] SB  
+	[1] SH  
+	[1] SW  
 
-## Testcases
+## Testcases(Simulation)
+ - All the "sleep"s in code are deleted.
+ - If there is an input file, use assignment instead of input.
+ 
 0 - failed  
 1 - passed  
 2 - unknown  
-[0] array_test1  
-[0] array_test2  
-[0] basicopt1  
-[0] bulgarian  
-[0] expr  
-[0] gcd  
-[0] hanoi  
-[0] lvalue2  
-[0] magic  
-[0] manyarguments  
-[0] multiarray  
+[1] array_test1
+[1] array_test2
+[1] basicopt1  
+[1] bulgarian
+[1] expr  
+[1] gcd  
+[1] hanoi  
+[1] lvalue2  
+[1] magic  
+[1] manyarguments  
+[1] multiarray  
 [0] pi  
-[0] qsort  
-[0] queens  
-[0] statement_test  
-[0] superloop  
-[0] tak
+[1] qsort
+[1] queens
+[1] statement_test  
+[1] superloop
+[1] tak

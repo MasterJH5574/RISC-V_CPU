@@ -112,7 +112,7 @@ module EX(
                 end
                 `idBGEU: begin                              // BGEU
                     res             <= `ZERO32;
-                    if (rs1Data_in < rs2Data_in) begin
+                    if (rs1Data_in >= rs2Data_in) begin
                         pcJump_out  <= `Jump;
                         pcTarget_out<= pc_in + immData_in;
                     end else begin
@@ -216,7 +216,7 @@ module EX(
                     pcJump_out      <= `NoJump;
                     pcTarget_out    <= `ZERO32;
                 end
-                `idSRLI: begin
+                `idSRLI: begin                              // SRLI
                     res             <= rs1Data_in >> immData_in[4:0];
                     pcJump_out      <= `NoJump;
                     pcTarget_out    <= `ZERO32;
