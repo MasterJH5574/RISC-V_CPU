@@ -41,7 +41,7 @@ module memCtrl (
     wire[`addrRange] addr;
     wire ramRW_fake;
 
-    reg[7:0] loadData[3:0];
+    reg[7:0] loadData[2:0];
     wire[7:0] storeData[3:0];
     assign storeData[0] = MEMData_in[7:0];
     assign storeData[1] = MEMData_in[15:8];
@@ -62,7 +62,6 @@ module memCtrl (
             loadData[0] <= 8'b00000000;
             loadData[1] <= 8'b00000000;
             loadData[2] <= 8'b00000000;
-            loadData[3] <= 8'b00000000;
             busyIF_out  <= `NotBusy;
             busyMEM_out <= `NotBusy;
             IFinstE_out <= `writeDisable;
@@ -121,7 +120,6 @@ module memCtrl (
             loadData[0] <= 8'b00000000;
             loadData[1] <= 8'b00000000;
             loadData[2] <= 8'b00000000;
-            loadData[3] <= 8'b00000000;
             busyIF_out  <= `NotBusy;
             busyMEM_out <= `NotBusy;
             IFinstE_out <= `writeDisable;

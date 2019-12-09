@@ -23,17 +23,12 @@ module RegFile(
     integer i;
     reg[`dataRange] regs[0:31];
 
-    // initialize registers
+    // write first
     always @ (posedge clk_in) begin
         if (rst_in == `rstEnable) begin
             for (i = 0; i < 32; i = i + 1)
                 regs[i] <= 0;
-        end
-    end
-
-    // write first
-    always @ (posedge clk_in) begin
-        if (rst_in == `rstDisable) begin
+        end else begin
             if (writeE_in == `writeEnable && writeIdx_in != 5'h0) begin
                 regs[writeIdx_in] <= writeData_in;
             end

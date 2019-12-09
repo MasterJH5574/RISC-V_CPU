@@ -17,6 +17,7 @@ module PC (
 );
 
     reg pcJump;
+    reg Jump;
     reg[`addrRange] pcTarget;
 
     always @ (*) begin
@@ -26,20 +27,27 @@ module PC (
         end else if (pcJump_in == `Jump) begin
             pcJump      <= `Jump;
             pcTarget    <= pcTarget_in;
+        end else if (Jump == 1) begin
+            pcJump      <= `NoJump;
+            pcTarget    <= `ZERO32;
+        end else begin
+            // do nothing
         end
     end
 
     always @ (posedge clk_in) begin
         if (rst_in == `rstEnable) begin
             pc_out <= `ZERO32;
-        end else if (stall_in[0] == `NoStall) begin // Todo: Modify
+            Jump <= 0;
+        end else if (stall_in[0] == `NoStall) begin
             if (pcJump == `Jump) begin
                 pc_out <= pcTarget;
             end else begin
                 pc_out <= pc_out + `PCSTEP;
             end
-            pcJump      <= `NoJump;
-            pcTarget    <= `ZERO32;
+            Jump <= 1;
+        end else begin
+            Jump <= 0;
         end
     end
 
