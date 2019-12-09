@@ -403,6 +403,7 @@ module ID(
             rs1Data_out <= `ZERO32;
         end else if (Loading == 1'b1 && reg1E_out == `readEnable
             && EX_rdIdx_in && reg1Idx_out) begin
+            rs1Data_out <= `ZERO32;
             reg1Stall <= `Stall;
         end else if (reg1E_out == `readEnable && EX_rdE_in == `writeEnable &&
             EX_rdIdx_in == reg1Idx_out) begin
@@ -423,6 +424,7 @@ module ID(
             rs2Data_out <= `ZERO32;
         end else if (Loading == 1'b1 && reg2E_out == `readEnable
             && EX_rdIdx_in && reg2Idx_out) begin
+            rs2Data_out <= `ZERO32;
             reg2Stall <= `Stall;
         end else if (reg2E_out == `readEnable && EX_rdE_in == `writeEnable &&
             EX_rdIdx_in == reg2Idx_out) begin
