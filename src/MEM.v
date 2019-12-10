@@ -101,6 +101,8 @@ module MEM(
                         rdData_out <= MC_data_in[15:0];
                     end else if (instIdx_in == `idLW) begin
                         rdData_out <= MC_data_in;
+                    end else begin
+                        rdData_out <= `ZERO32;
                     end
                     memStall_out<= `NoStall;
                 end else begin
@@ -114,6 +116,8 @@ module MEM(
                         MCLen_out <= 2;
                     end else if (instIdx_in == `idLW) begin
                         MCLen_out <= 4;
+                    end else begin
+                        MCLen_out <= 0;
                     end
                     MEM_MCAccess_out <= `Enable;
                     rdE_out     <= `writeDisable;
@@ -146,6 +150,9 @@ module MEM(
                     end else if (instIdx_in == `idSW) begin
                         MCData_out  <= valStore_in;
                         MCLen_out   <= 4;
+                    end else begin
+                        MCData_out  <= `ZERO32;
+                        MCLen_out   <= 0;
                     end
                     MEM_MCAccess_out <= `Enable;
                     rdE_out     <= `writeDisable;
@@ -153,6 +160,17 @@ module MEM(
                     rdData_out  <= `ZERO32;
                     memStall_out<= `Stall;
                 end
+            end else begin
+                MCE_out     <= `Disable;
+                MCrw_out    <= `READ;
+                MCAddr_out  <= `ZERO32;
+                MCData_out  <= `ZERO32;
+                MCLen_out   <= 0;
+                MEM_MCAccess_out <= `Disable;
+                rdE_out     <= `writeDisable;
+                rdIdx_out   <= `regNOP;
+                rdData_out  <= `ZERO32;
+                memStall_out<= `NoStall;
             end
         end
     end
