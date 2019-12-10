@@ -24,7 +24,7 @@ module IF_ID(
     reg[`instRange] inst;
     reg handle;
 
-    always @ (*) begin
+    always @ (negedge clk_in) begin
         if (rst_in == `rstEnable) begin
             pc      <= `ZERO32;
             inst    <= `ZERO32;
