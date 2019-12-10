@@ -21,12 +21,12 @@ module RegFile(
 );
 
     integer i;
-    reg[`dataRange] regs[0:31];
+    reg[`dataRange] regs[1:31];
 
     // write first
     always @ (posedge clk_in) begin
         if (rst_in == `rstEnable) begin
-            for (i = 0; i < 32; i = i + 1)
+            for (i = 1; i < 32; i = i + 1)
                 regs[i] <= 0;
         end else begin
             if (writeE_in == `writeEnable && writeIdx_in != 5'h0) begin

@@ -121,7 +121,7 @@ module cpu(
     wire                    ID_rdE_out;
     wire[`regIdxRange]      ID_rdIdx_out;
     wire[`instIdxRange]     ID_instIdx_out;
-    wire[`instTypeRange]    ID_instType_out;
+    wire                    ID_instType_out;
     wire[`dataRange]        ID_rs1Data_out;
     wire[`dataRange]        ID_rs2Data_out;
     wire[`dataRange]        ID_immData_out;
@@ -174,7 +174,7 @@ module cpu(
     wire                    ID_EX_rdE_out;
     wire[`regIdxRange]      ID_EX_rdIdx_out;
     wire[`instIdxRange]     ID_EX_instIdx_out;
-    wire[`instTypeRange]    ID_EX_instType_out;
+    wire                    ID_EX_instType_out;
     wire[`dataRange]        ID_EX_rs1Data_out;
     wire[`dataRange]        ID_EX_rs2Data_out;
     wire[`dataRange]        ID_EX_immData_out;

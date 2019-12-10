@@ -105,6 +105,7 @@
 
 `define dataWidth       32
 `define dataRange       31:0
+`define dataBusRange    7:0
 
 
 //---------------- Registers ---------------------

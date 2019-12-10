@@ -34,7 +34,7 @@ module ID(
     output reg[`regIdxRange]    rdIdx_out,
 
     output reg[`instIdxRange]   instIdx_out,
-    output reg[`instTypeRange]  instType_out,
+    output reg                  instType_out,
 
     output reg[`dataRange]      rs1Data_out,
     output reg[`dataRange]      rs2Data_out,

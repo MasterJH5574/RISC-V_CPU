@@ -10,7 +10,7 @@ module EX(
     input wire[`regIdxRange]    rdIdx_in,
 
     input wire[`instIdxRange]   instIdx_in,
-    input wire[`instTypeRange]  instType_in,
+    input wire                  instType_in,
 
     input wire[`dataRange]      rs1Data_in,
     input wire[`dataRange]      rs2Data_in,

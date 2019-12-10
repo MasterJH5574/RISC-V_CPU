@@ -17,7 +17,7 @@ module ID_EX(
     input wire[`regIdxRange]    rdIdx_in,
 
     input wire[`instIdxRange]   instIdx_in,
-    input wire[`instTypeRange]  instType_in,
+    input wire                  instType_in,
 
     input wire[`dataRange]      rs1Data_in,
     input wire[`dataRange]      rs2Data_in,
@@ -30,7 +30,7 @@ module ID_EX(
     output reg[`regIdxRange]    rdIdx_out,
 
     output reg[`instIdxRange]   instIdx_out,
-    output reg[`instTypeRange]  instType_out,
+    output reg                  instType_out,
 
     output reg[`dataRange]      rs1Data_out,
     output reg[`dataRange]      rs2Data_out,

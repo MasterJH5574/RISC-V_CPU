@@ -16,12 +16,12 @@ module memCtrl (
     input wire[2:0]             MEMLen_in,
 
     // input from RAM
-    input wire[`dataRange]      ramData_in,
+    input wire[`dataBusRange]   ramData_in,
 
     // output to RAM
     output wire                 ramRW_out,
     output wire[`addrRange]     ramAddr_out,
-    output wire[`dataRange]     ramData_out,
+    output wire[`dataBusRange]  ramData_out,
 
     // busy signal
     output reg                  busyIF_out,
