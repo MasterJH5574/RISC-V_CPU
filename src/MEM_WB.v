@@ -3,6 +3,7 @@
 module MEM_WB(
     input wire                  clk_in,
     input wire                  rst_in,
+    input wire                  rdy_in,
 
     // stall or not
     input wire[`stallRange]     stall_in,
@@ -24,16 +25,16 @@ module MEM_WB(
             rdE_out     <= `writeDisable;
             rdIdx_out   <= `regNOP;
             rdData_out  <= `ZERO32;
-        end else if (stall_in[4] == `Stall && stall_in[5] == `NoStall) begin
-            rdE_out     <= `writeDisable;
-            rdIdx_out   <= `regNOP;
-            rdData_out  <= `ZERO32;
-        end else if (stall_in[4] == `NoStall) begin
-            rdE_out     <= rdE_in;
-            rdIdx_out   <= rdIdx_in;
-            rdData_out  <= rdData_in;
-        end else begin
-            // do nothing
+        end else if (rdy_in == 1) begin
+            if (stall_in[4] == `Stall && stall_in[5] == `NoStall) begin
+                rdE_out     <= `writeDisable;
+                rdIdx_out   <= `regNOP;
+                rdData_out  <= `ZERO32;
+            end else if (stall_in[4] == `NoStall) begin
+                rdE_out     <= rdE_in;
+                rdIdx_out   <= rdIdx_in;
+                rdData_out  <= rdData_in;
+            end
         end
     end
 endmodule : MEM_WB

@@ -4,7 +4,7 @@
 module cpu(
     input  wire                 clk_in,			// system clock signal
     input  wire                 rst_in,			// reset signal
-    input  wire					rdy_in,		    // ready signal, pause cpu when low // Todo: usage
+    input  wire					rdy_in,		    // ready signal, pause cpu when low
 
     input  wire [ 7:0]          mem_din,		// data input bus
     output wire [ 7:0]          mem_dout,		// data output bus
@@ -47,7 +47,7 @@ module cpu(
     PC PC0(
         .clk_in(clk_in),
         .rst_in(rst_in),
-        .rdy_in(rdy_in), // Todo
+        .rdy_in(rdy_in),
         .stall_in(stall_out),
         .pcJump_in(pcJump),
         .pcTarget_in(pcTarget),
@@ -97,6 +97,7 @@ module cpu(
     IF_ID IF_ID0(
         .clk_in(clk_in),
         .rst_in(rst_in),
+        .rdy_in(rdy_in),
         .stall_in(stall_out),
         .pcJump_in(pcJump),
         .instE_in(IF_instE_out),
@@ -182,6 +183,7 @@ module cpu(
     ID_EX ID_EX0(
         .clk_in(clk_in),
         .rst_in(rst_in),
+        .rdy_in(rdy_in),
         .stall_in(stall_out),
         .pcJump_in(pcJump),
         .pc_in(ID_pc_out),
@@ -233,6 +235,7 @@ module cpu(
     EX_MEM EX_MEM0(
         .clk_in(clk_in),
         .rst_in(rst_in),
+        .rdy_in(rdy_in),
         .stall_in(stall_out),
         .instIdx_in(EX_instIdx_out),
         .memAddr_in(EX_memAddr_out),
@@ -289,6 +292,7 @@ module cpu(
     MEM_WB MEM_WB0(
         .clk_in(clk_in),
         .rst_in(rst_in),
+        .rdy_in(rdy_in),
         .stall_in(stall_out),
         .rdE_in(MEM_rdE_out),
         .rdIdx_in(MEM_rdIdx_out),
@@ -301,6 +305,7 @@ module cpu(
     RegFile RegFile0(
         .clk_in(clk_in),
         .rst_in(rst_in),
+        .rdy_in(rdy_in),
         .writeE_in(MEM_WB_rdE_out),
         .writeIdx_in(MEM_WB_rdIdx_out),
         .writeData_in(MEM_WB_rdData_out),
@@ -315,6 +320,7 @@ module cpu(
     memCtrl memCtrl0(
         .clk_in(clk_in),
         .rst_in(rst_in),
+        .rdy_in(rdy_in),
         .IF_in(IF_MCE_out),
         .IFAddr_in(IF_MCAddr_out),
         .MEM_in(MEM_MCE_out),

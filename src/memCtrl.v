@@ -3,6 +3,7 @@
 module memCtrl (
     input wire                  clk_in,
     input wire                  rst_in,
+    input wire                  rdy_in,
 
     // input from IF
     input wire                  IF_in,
@@ -68,64 +69,66 @@ module memCtrl (
             IFinst_out  <= `ZERO32;
             MEMdataE_out<= `writeDisable;
             MEMdata_out <= `ZERO32;
-        end else if (ramRW_fake == `READ && tot != 0) begin
-            if (cnt == 0) begin
-                cnt         <= cnt + 1;
-                busyIF_out  <= IF_in == `Enable ? `Busy : `NotBusy;
-                busyMEM_out <= MEM_in == `Enable ? `Busy : `NotBusy;
-                IFinstE_out <= `writeDisable;
-                IFinst_out  <= `ZERO32;
-                MEMdataE_out<= `writeDisable;
-                MEMdata_out <= `ZERO32;
-            end else if (cnt < tot) begin
-                cnt         <= cnt + 1;
-                loadData[cnt - 1] <= ramData_in;
-            end else if (cnt == tot) begin
-                cnt         <= 0; // Todo
-                if (MEM_in == `Enable) begin
-                    MEMdataE_out    <= `writeEnable;
-                    case (MEMLen_in)
-                        3'b001: begin
-                            MEMdata_out <= ramData_in;
-                        end
-                        3'b010: begin
-                            MEMdata_out <= {ramData_in, loadData[0]};
-                        end
-                        3'b100: begin
-                            MEMdata_out <= {ramData_in, loadData[2], loadData[1], loadData[0]};
-                        end
-                    endcase
-                end else if (IF_in == `Enable) begin
-                    IFinstE_out <= `writeEnable;
-                    IFinst_out  <= {ramData_in, loadData[2], loadData[1], loadData[0]};
+        end else if (rdy_in == 1) begin
+            if (ramRW_fake == `READ && tot != 0) begin
+                if (cnt == 0) begin
+                    cnt         <= cnt + 1;
+                    busyIF_out  <= IF_in == `Enable ? `Busy : `NotBusy;
+                    busyMEM_out <= MEM_in == `Enable ? `Busy : `NotBusy;
+                    IFinstE_out <= `writeDisable;
+                    IFinst_out  <= `ZERO32;
+                    MEMdataE_out<= `writeDisable;
+                    MEMdata_out <= `ZERO32;
+                end else if (cnt < tot) begin
+                    cnt         <= cnt + 1;
+                    loadData[cnt - 1] <= ramData_in;
+                end else if (cnt == tot) begin
+                    cnt         <= 0;
+                    if (MEM_in == `Enable) begin
+                        MEMdataE_out    <= `writeEnable;
+                        case (MEMLen_in)
+                            3'b001: begin
+                                MEMdata_out <= ramData_in;
+                            end
+                            3'b010: begin
+                                MEMdata_out <= {ramData_in, loadData[0]};
+                            end
+                            3'b100: begin
+                                MEMdata_out <= {ramData_in, loadData[2], loadData[1], loadData[0]};
+                            end
+                        endcase
+                    end else if (IF_in == `Enable) begin
+                        IFinstE_out <= `writeEnable;
+                        IFinst_out  <= {ramData_in, loadData[2], loadData[1], loadData[0]};
+                    end
                 end
-            end
-        end else if (ramRW_fake == `WRITE && tot != 0) begin
-            if (cnt == 0) begin
-                cnt         <= cnt + 1;
+            end else if (ramRW_fake == `WRITE && tot != 0) begin
+                if (cnt == 0) begin
+                    cnt         <= cnt + 1;
+                    busyIF_out  <= `NotBusy;
+                    busyMEM_out <= `Busy;
+                    IFinstE_out <= `writeDisable;
+                    IFinst_out  <= `ZERO32;
+                    MEMdataE_out<= `writeDisable;
+                    MEMdata_out <= `ZERO32;
+                end else if (cnt < tot) begin
+                    cnt         <= cnt + 1;
+                end else if (cnt == tot) begin
+                    cnt         <= 0;
+                    MEMdataE_out<= `writeEnable; // to tell MEM that the store procedure is finished
+                end
+            end else if (tot == 0) begin
+                cnt         <= 0;
+                loadData[0] <= 8'b00000000;
+                loadData[1] <= 8'b00000000;
+                loadData[2] <= 8'b00000000;
                 busyIF_out  <= `NotBusy;
-                busyMEM_out <= `Busy;
+                busyMEM_out <= `NotBusy;
                 IFinstE_out <= `writeDisable;
                 IFinst_out  <= `ZERO32;
                 MEMdataE_out<= `writeDisable;
                 MEMdata_out <= `ZERO32;
-            end else if (cnt < tot) begin
-                cnt         <= cnt + 1;
-            end else if (cnt == tot) begin
-                cnt         <= 0;
-                MEMdataE_out<= `writeEnable; // to tell MEM that the store procedure is finished
             end
-        end else if (tot == 0) begin
-            cnt         <= 0;
-            loadData[0] <= 8'b00000000;
-            loadData[1] <= 8'b00000000;
-            loadData[2] <= 8'b00000000;
-            busyIF_out  <= `NotBusy;
-            busyMEM_out <= `NotBusy;
-            IFinstE_out <= `writeDisable;
-            IFinst_out  <= `ZERO32;
-            MEMdataE_out<= `writeDisable;
-            MEMdata_out <= `ZERO32;
         end
     end
 

@@ -3,6 +3,7 @@
 module RegFile(
     input wire                  clk_in,
     input wire                  rst_in,
+    input wire                  rdy_in,
 
     // write
     input wire                  writeE_in,
@@ -28,7 +29,7 @@ module RegFile(
         if (rst_in == `rstEnable) begin
             for (i = 1; i < 32; i = i + 1)
                 regs[i] <= 0;
-        end else begin
+        end else if (rdy_in == 1) begin
             if (writeE_in == `writeEnable && writeIdx_in != 5'h0) begin
                 regs[writeIdx_in] <= writeData_in;
             end

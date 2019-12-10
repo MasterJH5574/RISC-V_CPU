@@ -48,12 +48,9 @@ module ID(
     wire[2:0] funct3 = inst_in[14:12];
     wire[6:0] funct7 = inst_in[31:25];
 
-    reg instValid;              // Todo: usage of instValid?
-
     // ---------------- DECODE -------------------
     always @ (*) begin
         if (rst_in == `rstEnable) begin
-            instValid       <= `instValid;
             instIdx_out     <= `idNOP;
             instType_out    <= `typeNOP;
             rdE_out         <= `writeDisable;
@@ -66,7 +63,6 @@ module ID(
         end else begin
             case (opcode)
                 `opLUI: begin                                       // LUI, U-type
-                    instValid   <= `instValid;
                     reg1E_out   <= `readDisable;
                     reg2E_out   <= `readDisable;
                     reg1Idx_out <= `regNOP;
@@ -78,7 +74,6 @@ module ID(
                     instType_out<= `typeValid;
                 end
                 `opAUIPC: begin                                     // AUIPC, U-type
-                    instValid   <= `instValid;
                     reg1E_out   <= `readDisable;
                     reg2E_out   <= `readDisable;
                     reg1Idx_out <= `regNOP;
@@ -90,7 +85,6 @@ module ID(
                     instType_out<= `typeValid;
                 end
                 `opJAL: begin                                       // JAL, J-type
-                    instValid   <= `instValid;
                     reg1E_out   <= `readDisable;
                     reg2E_out   <= `readDisable;
                     reg1Idx_out <= `regNOP;
@@ -103,7 +97,6 @@ module ID(
                     instType_out<= `typeValid;
                 end
                 `opJALR: begin                                      // JALR, I-type
-                    instValid   <= `instValid;
                     reg1E_out   <= `readEnable;
                     reg2E_out   <= `readDisable;
                     reg1Idx_out <= inst_in[19:15];
@@ -115,7 +108,6 @@ module ID(
                     instType_out<= `typeValid;
                 end
                 `opBranch: begin
-                    instValid   <= `instValid;
                     reg1E_out   <= `readEnable;
                     reg2E_out   <= `readEnable;
                     reg1Idx_out <= inst_in[19:15];
@@ -126,30 +118,29 @@ module ID(
                     case (funct3)
                         3'b000: begin                                   // BEQ, B-type
                             instIdx_out     <= `idBEQ;
-                            instType_out    <= `instValid;
+                            instType_out    <= `typeValid;
                         end
                         3'b001: begin                                   // BNE, B-type
                             instIdx_out     <= `idBNE;
-                            instType_out    <= `instValid;
+                            instType_out    <= `typeValid;
                         end
                         3'b100: begin                                   // BLT, B-type
                             instIdx_out     <= `idBLT;
-                            instType_out    <= `instValid;
+                            instType_out    <= `typeValid;
                         end
                         3'b101: begin                                   // BGE, B-type
                             instIdx_out     <= `idBGE;
-                            instType_out    <= `instValid;
+                            instType_out    <= `typeValid;
                         end
                         3'b110: begin                                   // BLTU, B-type
                             instIdx_out     <= `idBLTU;
-                            instType_out    <= `instValid;
+                            instType_out    <= `typeValid;
                         end
                         3'b111: begin                                   // BGEU, B-type
                             instIdx_out     <= `idBGEU;
-                            instType_out    <= `instValid;
+                            instType_out    <= `typeValid;
                         end
                         default: begin
-                            instValid       <= `instValid;
                             instIdx_out     <= `idNOP;
                             instType_out    <= `typeNOP;
                             rdE_out         <= `writeDisable;
@@ -163,7 +154,6 @@ module ID(
                     endcase
                 end
                 `opLoad: begin
-                    instValid   <= `instValid;
                     rdE_out     <= `writeEnable;
                     reg1E_out   <= `readEnable;
                     reg2E_out   <= `readDisable;
@@ -191,7 +181,6 @@ module ID(
                         default: begin
                             instIdx_out     <= `idNOP;
                             instType_out    <= `typeNOP;
-                            instValid       <= `instInvalid;
                             rdE_out         <= `writeDisable;
                             reg1E_out       <= `readDisable;
                             reg2E_out       <= `readDisable;
@@ -203,7 +192,6 @@ module ID(
                     endcase
                 end
                 `opStore: begin
-                    instValid   <= `instValid;
                     rdE_out     <= `writeDisable;
                     reg1E_out   <= `readEnable;
                     reg2E_out   <= `readEnable;
@@ -225,7 +213,6 @@ module ID(
                         default: begin
                             instIdx_out     <= `idNOP;
                             instType_out    <= `typeNOP;
-                            instValid       <= `instInvalid;
                             rdE_out         <= `writeDisable;
                             reg1E_out       <= `readDisable;
                             reg2E_out       <= `readDisable;
@@ -237,7 +224,6 @@ module ID(
                     endcase
                 end
                 `opRI: begin                                        // Reg-Imm
-                    instValid   <= `instValid;
                     rdE_out     <= `writeEnable;
                     reg1E_out   <= `readEnable;
                     reg2E_out   <= `readDisable;
@@ -299,7 +285,6 @@ module ID(
                         default : begin
                             instIdx_out     <= `idNOP;
                             instType_out    <= `typeNOP;
-                            instValid       <= `instInvalid;
                             rdE_out         <= `writeDisable;
                             reg1E_out       <= `readDisable;
                             reg2E_out       <= `readDisable;
@@ -311,7 +296,6 @@ module ID(
                     endcase
                 end
                 `opRR: begin                                        // Reg-Reg
-                    instValid   <= `instValid;
                     rdE_out     <= `writeEnable;
                     reg1E_out   <= `readEnable;
                     reg2E_out   <= `readEnable;
@@ -373,7 +357,6 @@ module ID(
                 end
 
                 default : begin
-                    instValid       <= `instValid;
                     instIdx_out     <= `idNOP;
                     instType_out    <= `typeNOP;
                     rdE_out         <= `writeDisable;

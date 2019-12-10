@@ -19,7 +19,7 @@ module PC (
     always @ (posedge clk_in) begin
         if (rst_in == `rstEnable) begin
             pc_out <= `ZERO32;
-        end else if (stall_in[0] == `NoStall) begin
+        end else if (rdy_in == 1 && stall_in[0] == `NoStall) begin
             if (pcJump_in == `Jump) begin
                 pc_out <= pcTarget_in;
             end else begin
