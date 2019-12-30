@@ -61,29 +61,29 @@ module cpu(
     wire[`instRange] IF_inst_out;
 
     // Memory Controller busy signal
-    wire MC_busyIF;
+    wire MC_busyICache;
     wire MC_busyMEM;
 
     // MEM accessing MC
     wire MEM_MCAccess_out;
 
-    // link IF and Memory Controller
-    wire                MC_instE_out;
-    wire[`instRange]    MC_inst_out;
-    wire                IF_MCE_out;
-    wire[`addrRange]    IF_MCAddr_out;
+    // link IF and I-cache
+    wire                ICache_IF_instE_out;
+    wire[`instRange]    ICache_IF_inst_out;
+    wire                IF_ICacheE_out;
+    wire[17:0]          IF_ICacheAddr_out;
 
     IF IF0(
+        .clk_in(clk_in),
         .rst_in(rst_in),
+        .rdy_in(rdy_in),
         .pc_in(PC_pc_out),
         .pcJump_in(pcJump),
         .MEM_MCAccess_in(MEM_MCAccess_out),
-        .MC_busyIF_in(MC_busyIF),
-        .MC_busyMEM_in(MC_busyMEM),
-        .instE_in(MC_instE_out),
-        .inst_in(MC_inst_out),
-        .MCE_out(IF_MCE_out),
-        .MCAddr_out(IF_MCAddr_out),
+        .instE_in(ICache_IF_instE_out),
+        .inst_in(ICache_IF_inst_out),
+        .ICache_out(IF_ICacheE_out),
+        .ICacheAddr_out(IF_ICacheAddr_out),
         .instE_out(IF_instE_out),
         .pc_out(IF_pc_out),
         .inst_out(IF_inst_out),
@@ -226,7 +226,7 @@ module cpu(
 
     // link EX_MEM to MEM
     wire[`instIdxRange]     EX_MEM_instIdx_out;
-    wire[`addrRange]        EX_MEM_memAddr_out;
+    wire[17:0]              EX_MEM_memAddr_out;
     wire[`dataRange]        EX_MEM_valStore_out;
     wire                    EX_MEM_rdE_out;
     wire[`regIdxRange]      EX_MEM_rdIdx_out;
@@ -268,7 +268,7 @@ module cpu(
         .rdE_in(EX_MEM_rdE_out),
         .rdIdx_in(EX_MEM_rdIdx_out),
         .rdData_in(EX_MEM_rdData_out),
-        .MC_busyIF_in(MC_busyIF),
+        .MC_busyICache_in(MC_busyICache),
         .MC_busyMEM_in(MC_busyMEM),
         .MC_dataE_in(MC_DataE_out),
         .MC_data_in(MC_Data_out),
@@ -317,12 +317,18 @@ module cpu(
         .reg2Data_out(RegFile_reg2Data_out)
     );
 
+    // link Memory Controller and I-cache
+    wire                    MC_ICache_instE_out;
+    wire[`instRange]        MC_ICache_inst_out;
+    wire                    ICache_MCE_out;
+    wire[`addrRange]        ICache_MC_addr_out;
+
     memCtrl memCtrl0(
         .clk_in(clk_in),
         .rst_in(rst_in),
         .rdy_in(rdy_in),
-        .IF_in(IF_MCE_out),
-        .IFAddr_in(IF_MCAddr_out),
+        .ICache_in(ICache_MCE_out),
+        .ICacheAddr_in(ICache_MC_addr_out),
         .MEM_in(MEM_MCE_out),
         .MEMrw_in(MEM_MCrw_out),
         .MEMAddr_in(MEM_MCAddr_out),
@@ -332,11 +338,28 @@ module cpu(
         .ramRW_out(mem_wr),
         .ramAddr_out(mem_a),
         .ramData_out(mem_dout),
-        .busyIF_out(MC_busyIF),
+        .busyICache_out(MC_busyICache),
         .busyMEM_out(MC_busyMEM),
-        .IFinstE_out(MC_instE_out),
-        .IFinst_out(MC_inst_out),
+        .ICache_instE_out(MC_ICache_instE_out),
+        .ICache_inst_out(MC_ICache_inst_out),
         .MEMdataE_out(MC_DataE_out),
         .MEMdata_out(MC_Data_out)
+    );
+
+    ICache ICache0(
+        .clk_in(clk_in),
+        .rst_in(rst_in),
+        .rdy_in(rdy_in),
+        .IF_in(IF_ICacheE_out),
+        .IFAddr_in(IF_ICacheAddr_out),
+        .MEM_MCAccess_in(MEM_MCAccess_out),
+        .MC_busyICache_in(MC_busyICache),
+        .MC_busyMEM_in(MC_busyMEM),
+        .MCinstE_in(MC_ICache_instE_out),
+        .MCinst_in(MC_ICache_inst_out),
+        .IF_instE_out(ICache_IF_instE_out),
+        .IF_inst_out(ICache_IF_inst_out),
+        .MCE_out(ICache_MCE_out),
+        .MC_addr_out(ICache_MC_addr_out)
     );
 endmodule : cpu

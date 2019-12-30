@@ -22,9 +22,10 @@ reg rst_delay;
 
 wire clk;
 
+//wire locked;
 // assign EXCLK (or your own clock module) to clk
 assign clk = EXCLK;
-
+//clk_wiz_0 clk_wiz(.reset(btnC),.clk_in1(EXCLK),.clk_out1(clk),.locked(locked));
 always @(posedge clk or posedge btnC)
 begin
 	if (btnC)

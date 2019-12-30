@@ -5,7 +5,7 @@ module MEM(
 
     // input from EX_MEM
     input wire[`instIdxRange]   instIdx_in,
-    input wire[`addrRange]      memAddr_in,
+    input wire[17:0]            memAddr_in,
     input wire[`dataRange]      valStore_in,
 
     input wire                  rdE_in,
@@ -13,7 +13,7 @@ module MEM(
     input wire[`dataRange]      rdData_in,
 
     // input from Memory Controller
-    input wire                  MC_busyIF_in,
+    input wire                  MC_busyICache_in,
     input wire                  MC_busyMEM_in,
     input wire                  MC_dataE_in,
     input wire[`dataRange]      MC_data_in,
@@ -25,7 +25,7 @@ module MEM(
     output reg[`dataRange]      MCData_out,
     output reg[2:0]             MCLen_out,
 
-    // output to IF, MEM is accessing MC
+    // output to I-cache, MEM is accessing MC
     output reg                  MEM_MCAccess_out,
 
     // output to MEM_WB
@@ -69,7 +69,7 @@ module MEM(
             end
             memStall_out<= `NoStall;
         end else begin
-            if (MC_busyIF_in == `Busy) begin
+            if (MC_busyICache_in == `Busy) begin
                 MCE_out     <= `Disable;
                 MCrw_out    <= `READ;
                 MCAddr_out  <= `ZERO32;

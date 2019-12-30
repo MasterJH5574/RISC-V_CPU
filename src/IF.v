@@ -1,7 +1,9 @@
 `include "defines.vh"
 
 module IF(
+    input wire                  clk_in,
     input wire                  rst_in,
+    input wire                  rdy_in,
 
     // input from PC
     input wire[`addrRange]      pc_in,
@@ -12,15 +14,13 @@ module IF(
     // input from MEM, MEM is accessing MC
     input wire                  MEM_MCAccess_in,
 
-    // input from Memory Controller
-    input wire                  MC_busyIF_in,
-    input wire                  MC_busyMEM_in,
+    // input from I-cache
     input wire                  instE_in,
     input wire[`instRange]      inst_in,
 
-    // output to Memory Controller
-    output reg                  MCE_out,
-    output reg[`addrRange]      MCAddr_out,
+    // output to I-cache
+    output reg                  ICache_out,
+    output reg[17:0]            ICacheAddr_out,
 
     // output to IF_ID
     output reg                  instE_out,
@@ -31,49 +31,45 @@ module IF(
     output reg                  ifStall_out
 );
 
+    always @ (posedge clk_in) begin
+        if (rst_in == `rstEnable) begin
+            ICache_out      <= `Disable;
+            ICacheAddr_out  <= `ZERO32;
+        end else if (rdy_in == 1) begin
+            if (pcJump_in == `Jump || MEM_MCAccess_in == `Enable) begin
+                ICache_out      <= `Disable;
+                ICacheAddr_out  <= `ZERO32;
+            end else if (instE_in == `writeEnable) begin
+                ICache_out      <= `Disable;
+                ICacheAddr_out  <= `ZERO32;
+            end else begin
+                ICache_out      <= `Enable;
+                ICacheAddr_out  <= pc_in;
+            end
+        end
+    end
+
     always @ (*) begin
         if (rst_in == `rstEnable) begin
-            MCE_out     <= `Disable;
-            MCAddr_out  <= `ZERO32;
-            instE_out   <= `Disable;
-            pc_out      <= `ZERO32;
-            inst_out    <= `ZERO32;
-            ifStall_out <= `NoStall;
-        end else if (pcJump_in == `Jump) begin
-            MCE_out     <= `Disable;
-            MCAddr_out  <= `ZERO32;
-            instE_out   <= `Disable;
-            pc_out      <= `ZERO32;
-            inst_out    <= `ZERO32;
-            ifStall_out <= `NoStall;
+            instE_out       <= `Disable;
+            pc_out          <= `ZERO32;
+            inst_out        <= `ZERO32;
+            ifStall_out     <= `NoStall;
+        end else if (pcJump_in == `Jump || MEM_MCAccess_in == `Enable) begin
+                instE_out       <= `Disable;
+                pc_out          <= `ZERO32;
+                inst_out        <= `ZERO32;
+                ifStall_out     <= `NoStall;
         end else if (instE_in == `writeEnable) begin
-            MCE_out     <= `Disable;
-            MCAddr_out  <= `ZERO32;
-            instE_out   <= `Enable;
-            pc_out      <= pc_in;
-            inst_out    <= inst_in;
-            ifStall_out <= `NoStall;
-        end else if (MEM_MCAccess_in == `Enable) begin
-            MCE_out     <= `Disable;
-            MCAddr_out  <= `ZERO32;
-            instE_out   <= `Disable;
-            pc_out      <= `ZERO32;
-            inst_out    <= `ZERO32;
-            ifStall_out <= `Stall;
-        end else if (MEM_MCAccess_in == `Disable && MC_busyMEM_in == `Busy) begin
-            MCE_out     <= `Disable;
-            MCAddr_out  <= `ZERO32;
-            instE_out   <= `Disable;
-            pc_out      <= `ZERO32;
-            inst_out    <= `ZERO32;
-            ifStall_out <= `NoStall;
+                instE_out       <= `Enable;
+                pc_out          <= pc_in;
+                inst_out        <= inst_in;
+                ifStall_out     <= `NoStall;
         end else begin
-            MCE_out     <= `Enable;
-            MCAddr_out  <= pc_in;
-            instE_out   <= `Disable;
-            pc_out      <= `ZERO32;
-            inst_out    <= `ZERO32;
-            ifStall_out <= `Stall;
+                instE_out       <= `Disable;
+                pc_out          <= `ZERO32;
+                inst_out        <= `ZERO32;
+                ifStall_out     <= `Stall;
         end
     end
 endmodule : IF

@@ -19,7 +19,7 @@ module EX_MEM(
 
     // output to MEM
     output reg[`instIdxRange]   instIdx_out,
-    output reg[`addrRange]      memAddr_out,
+    output reg[17:0]            memAddr_out,
     output reg[`dataRange]      valStore_out,
 
     output reg                  rdE_out,
