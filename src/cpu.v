@@ -27,7 +27,7 @@ module cpu(
 // - 0x30004 write: indicates program stop (will output '\0' through uart tx)
 
     // link the PC to IF
-    wire[`addrRange] PC_pc_out;
+//    wire[`addrRange] PC_pc_out;
 
     // stall controller
     wire ifStall, idStall, memStall; // send request
@@ -44,15 +44,15 @@ module cpu(
     wire                pcJump;
     wire[`addrRange]    pcTarget;
 
-    PC PC0(
-        .clk_in(clk_in),
-        .rst_in(rst_in),
-        .rdy_in(rdy_in),
-        .stall_in(stall_out),
-        .pcJump_in(pcJump),
-        .pcTarget_in(pcTarget),
-        .pc_out(PC_pc_out)
-    );
+//    PC PC0(
+//        .clk_in(clk_in),
+//        .rst_in(rst_in),
+//        .rdy_in(rdy_in),
+//        .stall_in(stall_out),
+//        .pcJump_in(pcJump),
+//        .pcTarget_in(pcTarget),
+//        .PC_pc_out(PC_pc_out)
+//    );
 
 
     // link IF to IF_ID
@@ -77,17 +77,18 @@ module cpu(
         .clk_in(clk_in),
         .rst_in(rst_in),
         .rdy_in(rdy_in),
-        .pc_in(PC_pc_out),
+//        .pc_in(PC_pc_out),
+        .stall_in(stall_out),
         .pcJump_in(pcJump),
+        .pcTarget_in(pcTarget),
         .MEM_MCAccess_in(MEM_MCAccess_out),
         .instE_in(ICache_IF_instE_out),
         .inst_in(ICache_IF_inst_out),
         .ICache_out(IF_ICacheE_out),
         .ICacheAddr_out(IF_ICacheAddr_out),
         .instE_out(IF_instE_out),
-        .pc_out(IF_pc_out),
-        .inst_out(IF_inst_out),
-        .ifStall_out(ifStall)
+        .IF_pc_out(IF_pc_out),
+        .inst_out(IF_inst_out)
     );
 
     // link IF_ID to ID
@@ -103,7 +104,7 @@ module cpu(
         .instE_in(IF_instE_out),
         .pc_in(IF_pc_out),
         .inst_in(IF_inst_out),
-        .pc_out(IF_ID_pc_out),
+        .IF_ID_pc_out(IF_ID_pc_out),
         .inst_out(IF_ID_inst_out)
     );
 
@@ -159,7 +160,7 @@ module cpu(
         .reg2E_out(ID_reg2E_out),
         .reg1Idx_out(ID_reg1Idx_out),
         .reg2Idx_out(ID_reg2Idx_out),
-        .pc_out(ID_pc_out),
+        .ID_pc_out(ID_pc_out),
         .rdE_out(ID_rdE_out),
         .rdIdx_out(ID_rdIdx_out),
         .instIdx_out(ID_instIdx_out),
@@ -194,7 +195,7 @@ module cpu(
         .rs1Data_in(ID_rs1Data_out),
         .rs2Data_in(ID_rs2Data_out),
         .immData_in(ID_immData_out),
-        .pc_out(ID_EX_pc_out),
+        .ID_EX_pc_out(ID_EX_pc_out),
         .rdE_out(ID_EX_rdE_out),
         .rdIdx_out(ID_EX_rdIdx_out),
         .instIdx_out(ID_EX_instIdx_out),
@@ -361,6 +362,7 @@ module cpu(
         .IF_instE_out(ICache_IF_instE_out),
         .IF_inst_out(ICache_IF_inst_out),
         .MCE_out(ICache_MCE_out),
-        .MC_addr_out(ICache_MC_addr_out)
+        .MC_addr_out(ICache_MC_addr_out),
+        .ifStall_out(ifStall)
     );
 endmodule : cpu

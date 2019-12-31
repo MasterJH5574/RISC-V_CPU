@@ -28,7 +28,7 @@ module ID(
     output reg[`regIdxRange]    reg2Idx_out,
 
     // output to ID_EX
-    output wire[`addrRange]      pc_out,
+    output wire[`addrRange]     ID_pc_out,
 
     output reg                  rdE_out,
     output reg[`regIdxRange]    rdIdx_out,
@@ -381,55 +381,43 @@ module ID(
 
     // ----------------- DECODE FINISH ----------------
     always @ (*) begin
-        if (rst_in == `rstEnable) begin
+        if (rst_in == `rstEnable || reg1E_out == `readDisable) begin
             rs1Data_out <= `ZERO32;
             reg1Stall <= `NoStall;
-        end else if (Loading == 1'b1 && reg1E_out == `readEnable
-            && EX_rdIdx_in && reg1Idx_out) begin
+        end else if (Loading == 1'b1 && EX_rdIdx_in == reg1Idx_out) begin
             rs1Data_out <= `ZERO32;
             reg1Stall <= `Stall;
-        end else if (reg1E_out == `readEnable && EX_rdE_in == `writeEnable &&
-            EX_rdIdx_in == reg1Idx_out) begin
+        end else if (reg1E_out == `readEnable && EX_rdIdx_in == reg1Idx_out) begin
             rs1Data_out <= EX_rdData_in;
             reg1Stall <= `NoStall;
-        end else if (reg1E_out == `readEnable && MEM0_rdE_in == `writeEnable &&
-            MEM0_rdIdx_in == reg1Idx_out) begin
+        end else if (reg1E_out == `readEnable && MEM0_rdIdx_in == reg1Idx_out) begin
             rs1Data_out <= MEM0_rdData_in;
             reg1Stall <= `NoStall;
-        end else if (reg1E_out == `readEnable) begin
-            rs1Data_out <= reg1Data_in;
-            reg1Stall <= `NoStall;
         end else begin
-            rs1Data_out <= `ZERO32;
+            rs1Data_out <= reg1Data_in;
             reg1Stall <= `NoStall;
         end
     end
 
     always @ (*) begin
-        if (rst_in == `rstEnable) begin
+        if (rst_in == `rstEnable || reg2E_out == `readDisable) begin
             rs2Data_out <= `ZERO32;
             reg2Stall <= `NoStall;
-        end else if (Loading == 1'b1 && reg2E_out == `readEnable
-            && EX_rdIdx_in && reg2Idx_out) begin
+        end else if (Loading == 1'b1 && EX_rdIdx_in == reg2Idx_out) begin
             rs2Data_out <= `ZERO32;
             reg2Stall <= `Stall;
-        end else if (reg2E_out == `readEnable && EX_rdE_in == `writeEnable &&
-            EX_rdIdx_in == reg2Idx_out) begin
+        end else if (reg2E_out == `readEnable && EX_rdIdx_in == reg2Idx_out) begin
             rs2Data_out <= EX_rdData_in;
             reg2Stall <= `NoStall;
-        end else if (reg2E_out == `readEnable && MEM0_rdE_in == `writeEnable &&
-            MEM0_rdIdx_in== reg2Idx_out) begin
+        end else if (reg2E_out == `readEnable && MEM0_rdIdx_in== reg2Idx_out) begin
             rs2Data_out <= MEM0_rdData_in;
             reg2Stall <= `NoStall;
-        end else if (reg2E_out == `readEnable) begin
-            rs2Data_out <= reg2Data_in;
-            reg2Stall <= `NoStall;
         end else begin
-            rs2Data_out <= `ZERO32;
+            rs2Data_out <= reg2Data_in;
             reg2Stall <= `NoStall;
         end
     end
 
-    assign pc_out = pc_in;
+    assign ID_pc_out = pc_in;
     assign idStall_out = reg1Stall | reg2Stall;
 endmodule : ID

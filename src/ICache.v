@@ -25,7 +25,10 @@ module ICache (
 
     // output to MC
     output reg                  MCE_out,
-    output reg[`addrRange]      MC_addr_out
+    output reg[`addrRange]      MC_addr_out,
+
+    // stall request
+    output reg                  ifStall_out
 );
     reg[31:0] icache[127:0];
     reg[8:0]  tag[127:0];
@@ -47,13 +50,16 @@ module ICache (
             if (hitOrNot) begin
                 IF_instE_out    <= `Enable;
                 IF_inst_out     <= icache[index];
+                ifStall_out     <= `NoStall;
             end else begin
                 IF_instE_out    <= `Disable;
                 IF_inst_out     <= `ZERO32;
+                ifStall_out     <= `Stall;
             end
         end else begin
             IF_instE_out    <= `Disable;
             IF_inst_out     <= `ZERO32;
+            ifStall_out     <= `NoStall;
         end
     end
 

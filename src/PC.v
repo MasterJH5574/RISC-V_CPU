@@ -13,17 +13,17 @@ module PC (
     input wire[`addrRange]      pcTarget_in,
 
     // output to IF
-    output reg[`addrRange]      pc_out
+    output reg[`addrRange]      PC_pc_out
 );
 
     always @ (posedge clk_in) begin
         if (rst_in == `rstEnable) begin
-            pc_out <= `ZERO32;
+            PC_pc_out <= `ZERO32;
         end else if (rdy_in == 1 && stall_in[0] == `NoStall) begin
             if (pcJump_in == `Jump) begin
-                pc_out <= pcTarget_in;
+                PC_pc_out <= pcTarget_in;
             end else begin
-                pc_out <= pc_out + `PCSTEP;
+                PC_pc_out <= PC_pc_out + `PCSTEP;
             end
         end
     end
