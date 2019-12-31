@@ -103,19 +103,19 @@ module memCtrl (
                     end
                 end
             end else if (ramRW_fake == `WRITE && tot != 0) begin
-                if (cnt == 0) begin
+                ICache_instE_out    <= `writeDisable;
+                ICache_inst_out     <= `ZERO32;
+                if (cnt == tot - 1) begin
+                    cnt         <= 0;
+                    MEMdataE_out<= `writeEnable; // to tell MEM that the store procedure is finished
+                end else if (cnt == 0) begin
                     cnt                 <= cnt + 1;
                     busyICache_out      <= `NotBusy;
                     busyMEM_out         <= `Busy;
-                    ICache_instE_out    <= `writeDisable;
-                    ICache_inst_out     <= `ZERO32;
                     MEMdataE_out        <= `writeDisable;
                     MEMdata_out         <= `ZERO32;
                 end else if (cnt < tot) begin
                     cnt         <= cnt + 1;
-                end else if (cnt == tot) begin
-                    cnt         <= 0;
-                    MEMdataE_out<= `writeEnable; // to tell MEM that the store procedure is finished
                 end
             end else if (tot == 0) begin
                 cnt                 <= 0;

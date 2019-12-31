@@ -31,45 +31,35 @@ module IF(
     output reg                  ifStall_out
 );
 
-    always @ (posedge clk_in) begin
-        if (rst_in == `rstEnable) begin
-            ICache_out      <= `Disable;
-            ICacheAddr_out  <= `ZERO32;
-        end else if (rdy_in == 1) begin
-            if (pcJump_in == `Jump || MEM_MCAccess_in == `Enable) begin
-                ICache_out      <= `Disable;
-                ICacheAddr_out  <= `ZERO32;
-            end else if (instE_in == `writeEnable) begin
-                ICache_out      <= `Disable;
-                ICacheAddr_out  <= `ZERO32;
-            end else begin
-                ICache_out      <= `Enable;
-                ICacheAddr_out  <= pc_in;
-            end
-        end
-    end
-
     always @ (*) begin
         if (rst_in == `rstEnable) begin
             instE_out       <= `Disable;
             pc_out          <= `ZERO32;
             inst_out        <= `ZERO32;
             ifStall_out     <= `NoStall;
+            ICache_out      <= `Disable;
+            ICacheAddr_out  <= `ZERO32;
         end else if (pcJump_in == `Jump || MEM_MCAccess_in == `Enable) begin
-                instE_out       <= `Disable;
-                pc_out          <= `ZERO32;
-                inst_out        <= `ZERO32;
-                ifStall_out     <= `NoStall;
+            instE_out       <= `Disable;
+            pc_out          <= `ZERO32;
+            inst_out        <= `ZERO32;
+            ifStall_out     <= `NoStall;
+            ICache_out      <= `Disable;
+            ICacheAddr_out  <= `ZERO32;
         end else if (instE_in == `writeEnable) begin
-                instE_out       <= `Enable;
-                pc_out          <= pc_in;
-                inst_out        <= inst_in;
-                ifStall_out     <= `NoStall;
+            instE_out       <= `Enable;
+            pc_out          <= pc_in;
+            inst_out        <= inst_in;
+            ifStall_out     <= `NoStall;
+            ICache_out      <= `Enable;
+            ICacheAddr_out  <= pc_in;
         end else begin
-                instE_out       <= `Disable;
-                pc_out          <= `ZERO32;
-                inst_out        <= `ZERO32;
-                ifStall_out     <= `Stall;
+            instE_out       <= `Disable;
+            pc_out          <= `ZERO32;
+            inst_out        <= `ZERO32;
+            ifStall_out     <= `Stall;
+            ICache_out      <= `Enable;
+            ICacheAddr_out  <= pc_in;
         end
     end
 endmodule : IF

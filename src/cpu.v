@@ -206,6 +206,7 @@ module cpu(
 
     EX EX0(
         .rst_in(rst_in),
+        .stall_in(stall_out),
         .pc_in(ID_EX_pc_out),
         .rdE_in(ID_EX_rdE_out),
         .rdIdx_in(ID_EX_rdIdx_out),

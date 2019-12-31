@@ -31,30 +31,49 @@ module ICache (
     reg[8:0]  tag[127:0];
     reg       valid[127:0];
 
+    wire[6:0] index;
+    wire[8:0] addr_tag;
+    assign index = IFAddr_in[8:2];
+    assign addr_tag = IFAddr_in[17:9];
+
+    wire hitOrNot;
+    wire MEM_Accessing;
+    assign hitOrNot = valid[index] && tag[index] == addr_tag;
+    assign MEM_Accessing = MEM_MCAccess_in == `Enable ||
+        (MEM_MCAccess_in == `Disable && MC_busyMEM_in == `Busy);
+
     always @(*) begin
         if (rst_in == `rstDisable && IF_in == `Enable) begin
-            if (valid[IFAddr_in[8:2]] && tag[IFAddr_in[8:2]] == IFAddr_in[17:9]) begin
+            if (hitOrNot) begin
                 IF_instE_out    <= `Enable;
-                IF_inst_out     <= icache[IFAddr_in[8:2]];
-                MCE_out         <= `Disable;
-                MC_addr_out     <= `ZERO32;
-            end else if (MEM_MCAccess_in == `Enable ||
-                (MEM_MCAccess_in == `Disable && MC_busyMEM_in == `Busy)) begin
-                IF_instE_out    <= `Disable;
-                IF_inst_out     <= `ZERO32;
-                MCE_out         <= `Disable;
-                MC_addr_out     <= `ZERO32;
+                IF_inst_out     <= icache[index];
             end else begin
                 IF_instE_out    <= `Disable;
                 IF_inst_out     <= `ZERO32;
-                MCE_out         <= `Enable;
-                MC_addr_out     <= IFAddr_in;
             end
         end else begin
             IF_instE_out    <= `Disable;
             IF_inst_out     <= `ZERO32;
-            MCE_out         <= `Disable;
-            MC_addr_out     <= `ZERO32;
+        end
+    end
+
+    always @(posedge clk_in) begin
+        if (rst_in == `rstDisable && rdy_in == 1) begin
+            if (IF_in == `Enable && hitOrNot == 0) begin
+                if (MCinstE_in == `Enable || MEM_Accessing) begin
+                    MCE_out     <= `Disable;
+                    MC_addr_out <= `ZERO32;
+                end else begin
+                    MCE_out     <= `Enable;
+                    MC_addr_out <= IFAddr_in;
+                end
+            end else begin
+                MCE_out     <= `Disable;
+                MC_addr_out <= `ZERO32;
+            end
+        end else begin
+            MCE_out     <= `Disable;
+            MC_addr_out <= `ZERO32;
         end
     end
 
@@ -67,9 +86,9 @@ module ICache (
                 valid[i]    <= 0;
             end
         end else if (rdy_in == 1 && MCinstE_in == `Enable) begin
-            valid[IFAddr_in[8:2]]   <= 1;
-            tag[IFAddr_in[8:2]]     <= IFAddr_in[17:9];
-            icache[IFAddr_in[8:2]]  <= MCinst_in;
+            valid[index]   <= 1;
+            tag[index]     <= addr_tag;
+            icache[index]  <= MCinst_in;
         end
     end
 

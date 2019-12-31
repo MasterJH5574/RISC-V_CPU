@@ -3,6 +3,9 @@
 module EX(
     input wire                  rst_in,
 
+    // stall or not (if stall, DO NOT execute)
+    input wire[`stallRange]     stall_in,
+
     // input from ID_EX
     input wire[`addrRange]      pc_in,
 
@@ -34,7 +37,7 @@ module EX(
 
 
     always @ (*) begin
-        if (rst_in == `rstEnable) begin
+        if (rst_in == `rstEnable || stall_in[3] == `Stall) begin
             res             <= `ZERO32;
             pcJump_out      <= `NoJump;
             pcTarget_out    <= `ZERO32;

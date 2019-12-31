@@ -21,46 +21,20 @@ module IF_ID(
     output reg[`instRange]      inst_out
 );
 
-    reg[`addrRange] pc;
-    reg[`instRange] inst;
-    reg handle;
-
-    always @ (negedge clk_in) begin
-        if (rst_in == `rstEnable) begin
-            pc      <= `ZERO32;
-            inst    <= `ZERO32;
-        end else if (rdy_in == 1) begin
-            if (instE_in == `Enable) begin
-                pc      <= pc_in;
-                inst    <= inst_in;
-            end else if (handle == 1) begin
-                pc      <= `ZERO32;
-                inst    <= `ZERO32;
-            end
-        end
-    end
-
     always @ (posedge clk_in) begin
         if (rst_in == `rstEnable) begin
             pc_out      <= `ZERO32;
             inst_out    <= `ZERO32;
-            handle      <= 0;
         end else if (rdy_in == 1) begin
             if (pcJump_in == `Jump) begin
                 pc_out      <= `ZERO32;
                 inst_out    <= `ZERO32;
-                handle      <= 0;
             end else if (stall_in[1] == `Stall && stall_in[2] == `NoStall) begin
                 pc_out      <= `ZERO32;
                 inst_out    <= `ZERO32;
-                handle      <= 0;
             end else if (stall_in[1] == `NoStall) begin
-                pc_out      <= pc;
-                inst_out    <= inst;
-                handle      <= 1;
-            end else begin
-                handle      <= 0;
-                // do nothing
+                pc_out      <= pc_in;
+                inst_out    <= inst_in;
             end
         end
     end
