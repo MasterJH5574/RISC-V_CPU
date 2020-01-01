@@ -5,6 +5,8 @@ module ICache (
     input wire                  rst_in,
     input wire                  rdy_in,
 
+    input wire                  pcJump_in,
+
     // input from IF
     input wire                  IF_in,
     input wire[17:0]            IFAddr_in,
@@ -46,7 +48,7 @@ module ICache (
         (MEM_MCAccess_in == `Disable && MC_busyMEM_in == `Busy);
 
     always @(*) begin
-        if (rst_in == `rstDisable && IF_in == `Enable) begin
+        if (rst_in == `rstDisable && IF_in == `Enable && pcJump_in == `NoJump) begin
             if (hitOrNot) begin
                 IF_instE_out    <= `Enable;
                 IF_inst_out     <= icache[index];

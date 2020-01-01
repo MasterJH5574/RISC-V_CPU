@@ -29,10 +29,12 @@ module IF_ID(
             if (pcJump_in == `Jump) begin
                 IF_ID_pc_out<= `ZERO32;
                 inst_out    <= `ZERO32;
-            end else if (stall_in[1] == `Stall && stall_in[2] == `NoStall) begin
+            end else if (stall_in[2] == `Stall) begin
+                // do nothing, keep the output signal
+            end else if (instE_in == `Disable) begin
                 IF_ID_pc_out<= `ZERO32;
                 inst_out    <= `ZERO32;
-            end else if (stall_in[1] == `NoStall) begin
+            end else begin // else if (stall_in[2] == `NoStall) begin
                 IF_ID_pc_out<= pc_in;
                 inst_out    <= inst_in;
             end

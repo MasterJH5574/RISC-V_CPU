@@ -26,9 +26,6 @@ module cpu(
 // - 0x30004 read: read clocks passed since cpu starts (in dword, 4 bytes)
 // - 0x30004 write: indicates program stop (will output '\0' through uart tx)
 
-    // link the PC to IF
-//    wire[`addrRange] PC_pc_out;
-
     // stall controller
     wire ifStall, idStall, memStall; // send request
     wire[`stallRange] stall_out;
@@ -43,17 +40,6 @@ module cpu(
     // link EX to PC, IF_ID and ID_EX for Jump and Branch
     wire                pcJump;
     wire[`addrRange]    pcTarget;
-
-//    PC PC0(
-//        .clk_in(clk_in),
-//        .rst_in(rst_in),
-//        .rdy_in(rdy_in),
-//        .stall_in(stall_out),
-//        .pcJump_in(pcJump),
-//        .pcTarget_in(pcTarget),
-//        .PC_pc_out(PC_pc_out)
-//    );
-
 
     // link IF to IF_ID
     wire  IF_instE_out;
@@ -77,7 +63,6 @@ module cpu(
         .clk_in(clk_in),
         .rst_in(rst_in),
         .rdy_in(rdy_in),
-//        .pc_in(PC_pc_out),
         .stall_in(stall_out),
         .pcJump_in(pcJump),
         .pcTarget_in(pcTarget),
@@ -352,6 +337,7 @@ module cpu(
         .clk_in(clk_in),
         .rst_in(rst_in),
         .rdy_in(rdy_in),
+        .pcJump_in(pcJump),
         .IF_in(IF_ICacheE_out),
         .IFAddr_in(IF_ICacheAddr_out),
         .MEM_MCAccess_in(MEM_MCAccess_out),
