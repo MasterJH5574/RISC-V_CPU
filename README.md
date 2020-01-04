@@ -24,6 +24,7 @@ A standard 6-stage pipeline CPU that implements RV32I with Verilog HDL.
   Maybe it is not a feature. I write it here because I think my Memory Controller is implemented badly hence it may cause several cycles of latency when RAM structural hazard occurs.
 
 * **Instruction Cache**
+
   A 128*4-byte, direct mapping cache.
   
   It takes 1 cycle when cache hit. Otherwise, I-Cache will send request to Memory Controller at the beginning of the next cycle(sequential circuit). Sadly, it takes 8 cycles to fetch a new instruction from RAM.
