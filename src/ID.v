@@ -3,8 +3,11 @@
 module ID(
     input wire                  rst_in,
 
+    // input from IF_ID
     input wire[`addrRange]      pc_in,
     input wire[`instRange]      inst_in,
+    input wire                  ID_taken_in,
+    input wire[`addrRange]      ID_pcPred_in,
 
     input wire[`dataRange]      reg1Data_in,
     input wire[`dataRange]      reg2Data_in,
@@ -39,6 +42,9 @@ module ID(
     output reg[`dataRange]      rs1Data_out,
     output reg[`dataRange]      rs2Data_out,
     output reg[`dataRange]      immData_out,
+
+    output wire                 ID_taken_out,
+    output wire[`addrRange]     ID_pcPred_out,
 
     // stall request
     output wire                 idStall_out
@@ -420,4 +426,6 @@ module ID(
 
     assign ID_pc_out = pc_in;
     assign idStall_out = reg1Stall | reg2Stall;
+    assign ID_taken_out = ID_taken_in;
+    assign ID_pcPred_out = ID_pcPred_in;
 endmodule : ID

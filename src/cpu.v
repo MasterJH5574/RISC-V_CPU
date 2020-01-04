@@ -37,6 +37,29 @@ module cpu(
         .stall_out(stall_out)
     );
 
+    // Branch Target Buffer
+    wire[`addrRange] IF_BTB_pc;
+    wire EX_BTB_in;
+    wire EX_BTB_opt;
+    wire[`addrRange] EX_BTB_pc;
+    wire[`addrRange] EX_BTB_target;
+    wire[`addrRange] BTB_pcPred;
+    wire BTB_taken;
+
+    BTB BTB0(
+        .clk_in(clk_in),
+        .rst_in(rst_in),
+        .rdy_in(rdy_in),
+        .IF_pc_in(IF_BTB_pc),
+        .EX_in(EX_BTB_in),
+        .EX_opt(EX_BTB_opt),
+        .EX_pc_in(EX_BTB_pc),
+        .EX_target_in(EX_BTB_target),
+        .taken_out(BTB_taken),
+        .pcPred_out(BTB_pcPred)
+    );
+
+
     // link EX to PC, IF_ID and ID_EX for Jump and Branch
     wire                pcJump;
     wire[`addrRange]    pcTarget;
@@ -45,6 +68,8 @@ module cpu(
     wire  IF_instE_out;
     wire[`addrRange] IF_pc_out;
     wire[`instRange] IF_inst_out;
+    wire IF_taken_out;
+    wire[`addrRange] IF_pcPred_out;
 
     // Memory Controller busy signal
     wire MC_busyICache;
@@ -69,16 +94,23 @@ module cpu(
         .MEM_MCAccess_in(MEM_MCAccess_out),
         .instE_in(ICache_IF_instE_out),
         .inst_in(ICache_IF_inst_out),
+        .IF_BTB_taken_in(BTB_taken),
+        .IF_BTB_pcPred_in(BTB_pcPred),
         .ICache_out(IF_ICacheE_out),
         .ICacheAddr_out(IF_ICacheAddr_out),
         .instE_out(IF_instE_out),
         .IF_pc_out(IF_pc_out),
-        .inst_out(IF_inst_out)
+        .inst_out(IF_inst_out),
+        .IF_taken_out(IF_taken_out),
+        .IF_pcPred_out(IF_pcPred_out),
+        .IF_BTB_pc_out(IF_BTB_pc)
     );
 
     // link IF_ID to ID
     wire[`addrRange] IF_ID_pc_out;
     wire[`instRange] IF_ID_inst_out;
+    wire             IF_ID_taken_out;
+    wire[`addrRange] IF_ID_pcPred_out;
 
     IF_ID IF_ID0(
         .clk_in(clk_in),
@@ -89,8 +121,12 @@ module cpu(
         .instE_in(IF_instE_out),
         .pc_in(IF_pc_out),
         .inst_in(IF_inst_out),
+        .IF_ID_taken_in(IF_taken_out),
+        .IF_ID_pcPred_in(IF_pcPred_out),
         .IF_ID_pc_out(IF_ID_pc_out),
-        .inst_out(IF_ID_inst_out)
+        .inst_out(IF_ID_inst_out),
+        .IF_ID_taken_out(IF_ID_taken_out),
+        .IF_ID_pcPred_out(IF_ID_pcPred_out)
     );
 
     // link ID to RegFile
@@ -112,6 +148,8 @@ module cpu(
     wire[`dataRange]        ID_rs1Data_out;
     wire[`dataRange]        ID_rs2Data_out;
     wire[`dataRange]        ID_immData_out;
+    wire                    ID_taken_out;
+    wire[`addrRange]        ID_pcPred_out;
 
     // link EX to EX_MEM, also forwarding to ID
     wire[`instIdxRange]     EX_instIdx_out; // link EX to ID to handle data hazard caused by LOAD
@@ -130,6 +168,8 @@ module cpu(
         .rst_in(rst_in),
         .pc_in(IF_ID_pc_out),
         .inst_in(IF_ID_inst_out),
+        .ID_taken_in(IF_ID_taken_out),
+        .ID_pcPred_in(IF_ID_pcPred_out),
         .reg1Data_in(RegFile_reg1Data_out),
         .reg2Data_in(RegFile_reg2Data_out),
         // -- begin forwarding input --
@@ -153,6 +193,8 @@ module cpu(
         .rs1Data_out(ID_rs1Data_out),
         .rs2Data_out(ID_rs2Data_out),
         .immData_out(ID_immData_out),
+        .ID_taken_out(ID_taken_out),
+        .ID_pcPred_out(ID_pcPred_out),
         .idStall_out(idStall)
     );
 
@@ -165,6 +207,8 @@ module cpu(
     wire[`dataRange]        ID_EX_rs1Data_out;
     wire[`dataRange]        ID_EX_rs2Data_out;
     wire[`dataRange]        ID_EX_immData_out;
+    wire                    ID_EX_taken_out;
+    wire[`addrRange]        ID_EX_pcPred_out;
 
     ID_EX ID_EX0(
         .clk_in(clk_in),
@@ -180,6 +224,8 @@ module cpu(
         .rs1Data_in(ID_rs1Data_out),
         .rs2Data_in(ID_rs2Data_out),
         .immData_in(ID_immData_out),
+        .ID_EX_taken_in(ID_taken_out),
+        .ID_EX_pcPred_in(ID_pcPred_out),
         .ID_EX_pc_out(ID_EX_pc_out),
         .rdE_out(ID_EX_rdE_out),
         .rdIdx_out(ID_EX_rdIdx_out),
@@ -187,8 +233,13 @@ module cpu(
         .instType_out(ID_EX_instType_out),
         .rs1Data_out(ID_EX_rs1Data_out),
         .rs2Data_out(ID_EX_rs2Data_out),
-        .immData_out(ID_EX_immData_out)
+        .immData_out(ID_EX_immData_out),
+        .ID_EX_taken_out(ID_EX_taken_out),
+        .ID_EX_pcPred_out(ID_EX_pcPred_out)
     );
+
+    // link EX to counter
+//    wire[1:0] counter_signal;
 
     EX EX0(
         .rst_in(rst_in),
@@ -201,12 +252,19 @@ module cpu(
         .rs1Data_in(ID_EX_rs1Data_out),
         .rs2Data_in(ID_EX_rs2Data_out),
         .immData_in(ID_EX_immData_out),
+        .EX_taken_in(ID_EX_taken_out),
+        .EX_pcPred_in(ID_EX_pcPred_out),
         .instIdx_out(EX_instIdx_out),
         .memAddr_out(EX_memAddr_out),
         .valStore_out(EX_valStore_out),
         .rdE_out(EX_rdE_out),
         .rdIdx_out(EX_rdIdx_out),
         .rdData_out(EX_rdData_out),
+        .EX_BTB_out(EX_BTB_in),
+        .EX_BTB_opt_out(EX_BTB_opt),
+        .EX_BTB_pc_out(EX_BTB_pc),
+        .EX_BTB_target_out(EX_BTB_target),
+//        .counter_out(counter_signal),
         .pcJump_out(pcJump),
         .pcTarget_out(pcTarget)
     );
@@ -308,7 +366,7 @@ module cpu(
     wire                    MC_ICache_instE_out;
     wire[`instRange]        MC_ICache_inst_out;
     wire                    ICache_MCE_out;
-    wire[`addrRange]        ICache_MC_addr_out;
+    wire[17:0]              ICache_MC_addr_out;
 
     memCtrl memCtrl0(
         .clk_in(clk_in),
@@ -351,4 +409,11 @@ module cpu(
         .MC_addr_out(ICache_MC_addr_out),
         .ifStall_out(ifStall)
     );
+
+//    counter counter0(
+//        .clk_in(clk_in),
+//        .rst_in(rst_in),
+//        .rdy_in(rdy_in),
+//        .counter_in(counter_signal)
+//    );
 endmodule : cpu

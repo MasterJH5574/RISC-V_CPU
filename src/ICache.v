@@ -27,7 +27,7 @@ module ICache (
 
     // output to MC
     output reg                  MCE_out,
-    output reg[`addrRange]      MC_addr_out,
+    output reg[17:0]            MC_addr_out,
 
     // stall request
     output reg                  ifStall_out

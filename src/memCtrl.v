@@ -7,7 +7,7 @@ module memCtrl (
 
     // input from I-cache
     input wire                  ICache_in,
-    input wire[`addrRange]      ICacheAddr_in,
+    input wire[17:0]            ICacheAddr_in,
 
     // input from MEM
     input wire                  MEM_in,
@@ -39,7 +39,7 @@ module memCtrl (
 
     reg[2:0] cnt;
     wire[2:0] tot;
-    wire[`addrRange] addr;
+    wire[17:0] addr;
     wire ramRW_fake;
 
     reg[7:0] loadData[2:0];
@@ -50,7 +50,7 @@ module memCtrl (
     assign storeData[3] = MEMData_in[31:24];
 
     assign tot          = MEM_in == `Enable ? MEMLen_in : (ICache_in == `Enable ? 4 : 0);
-    assign addr         = MEM_in == `Enable ? MEMAddr_in[`addrRange] : ICacheAddr_in[`addrRange];
+    assign addr         = MEM_in == `Enable ? MEMAddr_in : ICacheAddr_in;
     assign ramRW_out    = MEM_in == `Enable ?
                                     (cnt == tot ? `READ : MEMrw_in) : `READ;    // real RW signal
     assign ramRW_fake   = MEM_in == `Enable ? MEMrw_in : `READ;                 // used for I-cache

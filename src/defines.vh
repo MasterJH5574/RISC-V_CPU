@@ -1,10 +1,10 @@
 `ifndef DEFINES_VH
 `define DEFINES_VH
 
-`define ZERO8           8'h00
-`define ZERO17          17'b00000000000000000
-`define ZERO32          32'h00000000
-`define PCSTEP          4'h4
+`define ZERO8           0
+`define ZERO17          0
+`define ZERO32          0
+`define PCSTEP          4
 
 //----------------- Instruction OPCODE -----------------
 

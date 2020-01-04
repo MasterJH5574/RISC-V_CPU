@@ -24,6 +24,9 @@ module ID_EX(
     input wire[`dataRange]      rs2Data_in,
     input wire[`dataRange]      immData_in,
 
+    input wire                  ID_EX_taken_in,
+    input wire[`addrRange]      ID_EX_pcPred_in,
+
     // output to EX
     output reg[`addrRange]      ID_EX_pc_out,
 
@@ -35,8 +38,10 @@ module ID_EX(
 
     output reg[`dataRange]      rs1Data_out,
     output reg[`dataRange]      rs2Data_out,
-    output reg[`dataRange]      immData_out
+    output reg[`dataRange]      immData_out,
 
+    output reg                  ID_EX_taken_out,
+    output reg[`addrRange]      ID_EX_pcPred_out
 );
 
     always @ (posedge clk_in) begin
@@ -49,6 +54,8 @@ module ID_EX(
             immData_out     <= `ZERO32;
             rdE_out         <= `writeDisable;
             rdIdx_out       <= `regNOP;
+            ID_EX_taken_out <= 0;
+            ID_EX_pcPred_out<= `ZERO32;
         end else if (rdy_in == 1) begin
             if (pcJump_in == `Jump) begin
                 ID_EX_pc_out    <= `ZERO32;
@@ -59,6 +66,8 @@ module ID_EX(
                 immData_out     <= `ZERO32;
                 rdE_out         <= `writeDisable;
                 rdIdx_out       <= `regNOP;
+                ID_EX_taken_out <= 0;
+                ID_EX_pcPred_out<= `ZERO32;
             end else if (stall_in[2] == `Stall && stall_in[3] == `NoStall) begin
                 ID_EX_pc_out    <= `ZERO32;
                 instIdx_out     <= `idNOP;
@@ -68,6 +77,8 @@ module ID_EX(
                 immData_out     <= `ZERO32;
                 rdE_out         <= `writeDisable;
                 rdIdx_out       <= `regNOP;
+                ID_EX_taken_out <= 0;
+                ID_EX_pcPred_out<= `ZERO32;
             end else if (stall_in[2] == `NoStall) begin
                 ID_EX_pc_out    <= pc_in;
                 instIdx_out     <= instIdx_in;
@@ -77,6 +88,8 @@ module ID_EX(
                 immData_out     <= immData_in;
                 rdE_out         <= rdE_in;
                 rdIdx_out       <= rdIdx_in;
+                ID_EX_taken_out <= ID_EX_taken_in;
+                ID_EX_pcPred_out<= ID_EX_pcPred_in;
             end
         end
     end
